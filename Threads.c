@@ -1,4 +1,4 @@
-// ===== Include appropriate header files =====
+#include "msp.h"
 
 // These are the user-space threads. Note that they are completely oblivious
 // to the technical concerns of the scheduler. The only interface to the
@@ -12,7 +12,8 @@ void Thread0(void)
 {
   while(1)
   {
-	  
+      P2->OUT ^= 0x07;
+      __delay_cycles(500000); //TODO does this break the code?
   }
   
 }
@@ -25,10 +26,19 @@ void Thread0(void)
 void Thread1(void)
 {
 
-    /*RC3
+    while(1)
+    {
+        P1->OUT ^= 0x01;
+        __delay_cycles(500000); //TODO does this break the code?
+    }
+
+
+
+    /*
+     *  RC3
      * the code below was left as a reference but should be changed for LED purposes
      *
-     */
+
     int* threadlock;
     int count;
     //^^^^^THIS IS BULLSHIt^^^^^^ (NEEDED TO COMPILE)
@@ -46,6 +56,7 @@ void Thread1(void)
    }
    yield();                		// Give up control voluntarily (context switch "interrupt")
   }
+  */
 }
 
 

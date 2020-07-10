@@ -1,4 +1,5 @@
 #include "msp.h"
+#include "SysTick_3MHz.h"
 
 // ===== Function prototypes of functions written in OSasm.asm =====
 
@@ -21,16 +22,22 @@ tcbType *RunPt;						// Pointer to points to the next thread
 int32_t Stacks[NUMTHREADS][STACKSIZE];	// 2-dimensional array implemented as STACK
 
 
+
+
 // ===== OS_Init =====
 // Initialize operating system, disable interrupts until OS_Launch
 // Initialize OS controlled I/O: SysTick, 3 MHz crystal
 void OS_Init(void)
 {
-  OS_DisableInterrupts();
+    OS_DisableInterrupts(); //In OSasm.asm
+    __disable_irq();
+    initSysTick(1);
 								// Disable SysTick during setup (register approach)
 								// Any write to current clears it (register approach)
   SCB -> SHP[1] = (SCB -> SHP[1] & 0x00FFFFFF)|0xE0000000;          // Set priority 7 so that it allows threads to run
 }
+
+
 
 
 // ===== Sets default values in STACK ======
