@@ -1,0 +1,17 @@
+# Dependencies: cppcheck, indent
+# Run with following command:
+#     $ make -f tools_makefile <rule>
+
+.PHONY = all clean style static
+
+all: style static
+
+style:
+	$(sh indent -nbad -bap -nbc -bbo -hnl -br -brs -c33 -cd33 -ncdb -ce -ci4 -cli0 -d0 -di1 -nfc1 -i4 -ip0 -l80 -lp -npcs -nprs -npsl -sai -saf -saw -ncs -nsc -sob -nfca -cp33 -ss -ts8 -il1 *.c *.h)
+
+static:
+	$(sh cppcheck *.c *.h 2> static_err.txt)
+
+clean:
+	rm --force *.c~ *.h~ static_err.txt
+
