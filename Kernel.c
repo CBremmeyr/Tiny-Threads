@@ -5,6 +5,7 @@
 
 //Project Libraries
 #include "OS.h"
+#include "Threads.h"
 
 // ===== This is the kernel that will setup everything and run the scheduler ======
 
@@ -12,8 +13,6 @@
 //Defines
 //TODO is this right? What is this define we also have TIME_2MS
 #define TIMESLICE   6000      //2ms @ 3MHz used for Thread context switch time in clockcycles
-
-
 
 //Static Variable
 unsigned threadlock;            // Variable Lock
@@ -72,16 +71,14 @@ int main(void)
     OS_Init();                                      // Initialize OS
     GPIO_Init();                                    // Initialize GPIO peripheral
 
-	//TODO OS_AddThreads(Thread0, Thread1);		    // Add Threads to the list
-	//TODO OS_Launch(TIMESLICE);					// Launch OS
+	OS_AddThreads(Thread0, Thread1);		    // Add Threads to the list
+	OS_Launch(TIMESLICE);					// Launch OS
 
 
 
   return 0;            // This never executes
 
 }
-
-
 
 
 

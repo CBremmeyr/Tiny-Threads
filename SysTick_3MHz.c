@@ -39,7 +39,7 @@ int setSysTickInterrupt_mS(unsigned int mS){
 
     //finish the remainder
     float percentCycle = (mS) / 5592.40533; //%of full iteration
-    SysTick->LOAD = (int) (percentCycle * 0x00FFFFFF);
+    SysTick->LOAD = (int) (percentCycle * 0x00FFFFFF + .001);
     SysTick->VAL = 0;
 
     return 0;
