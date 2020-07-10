@@ -1,12 +1,12 @@
-// ===== Include appropriate header files =====
+#include "msp.h"
 
 // ===== Function prototypes of functions written in OSasm.asm =====
 
 
 
 
-#define NUMTHREADS  3             // Maximum number of threads
-#define STACKSIZE   100           // Number of 32-bit words in stack (You will have to keep increasing intelligently if code does not work)
+#define NUMTHREADS  2             // Maximum number of threads
+#define STACKSIZE   1024           // Number of 32-bit words in stack (You will have to keep increasing intelligently if code does not work)
 
 // ===== Structure to store state of thread =====
 struct tcb
@@ -17,8 +17,8 @@ struct tcb
 typedef struct tcb tcbType;
 
 tcbType tcbs[NUMTHREADS];			// Thread table
-tcbType *RunPt;						// Pointer to pointto the next thread
-int32_t Stacks[NUMTHREADS][STACKSIZE];	// 2-dimensional arry implemented as STACK
+tcbType *RunPt;						// Pointer to points to the next thread
+int32_t Stacks[NUMTHREADS][STACKSIZE];	// 2-dimensional array implemented as STACK
 
 
 // ===== OS_Init =====
@@ -37,22 +37,23 @@ void OS_Init(void)
 // Inputs: i is the threadnumber
 void SetInitialStack(int i)
 {
+#define x 0;
   tcbs[i].sp = &Stacks[i][STACKSIZE-16]; // thread stack pointer
-  Stacks[i][STACKSIZE-1] = 			 ;   // XPSR (store appropriate initial value) 	-- Saved by Exception
-  Stacks[i][STACKSIZE-3] = 			 ;   // R14 (store appropriate initial value)
-  Stacks[i][STACKSIZE-4] = 			 ;   // R12 (store appropriate initial value)
-  Stacks[i][STACKSIZE-5] = 			 ;   // R3 (store appropriate initial value)
-  Stacks[i][STACKSIZE-6] = 			 ;   // R2 (store appropriate initial value)
-  Stacks[i][STACKSIZE-7] = 			 ;   // R1 (store appropriate initial value)
-  Stacks[i][STACKSIZE-8] = 			 ;   // R0 (store appropriate initial value)	-- Saved by Exception
-  Stacks[i][STACKSIZE-9] = 			 ;   // R11 (store appropriate initial value)	-- Saved by you
-  Stacks[i][STACKSIZE-10] = 		 ;   // R10 (store appropriate initial value)
-  Stacks[i][STACKSIZE-11] = 		 ;   // R9 (store appropriate initial value)
-  Stacks[i][STACKSIZE-12] = 		 ;   // R8 (store appropriate initial value)
-  Stacks[i][STACKSIZE-13] = 		 ;   // R7 (store appropriate initial value)
-  Stacks[i][STACKSIZE-14] = 		 ;   // R6 (store appropriate initial value)
-  Stacks[i][STACKSIZE-15] = 		 ;   // R5 (store appropriate initial value)
-  Stacks[i][STACKSIZE-16] = 		 ;   // R4 (store appropriate initial value)	-- Saved by you
+  Stacks[i][STACKSIZE-1] = 	x	     ;   // XPSR (store appropriate initial value) 	-- Saved by Exception
+  Stacks[i][STACKSIZE-3] = 	x	     ;   // R14 (store appropriate initial value)
+  Stacks[i][STACKSIZE-4] = 	x	     ;   // R12 (store appropriate initial value)
+  Stacks[i][STACKSIZE-5] = 	x	     ;   // R3 (store appropriate initial value)
+  Stacks[i][STACKSIZE-6] = 	x	     ;   // R2 (store appropriate initial value)
+  Stacks[i][STACKSIZE-7] = 	x	     ;   // R1 (store appropriate initial value)
+  Stacks[i][STACKSIZE-8] = 	x	     ;   // R0 (store appropriate initial value)	-- Saved by Exception
+  Stacks[i][STACKSIZE-9] = 	x	     ;   // R11 (store appropriate initial value)	-- Saved by you
+  Stacks[i][STACKSIZE-10] = x	     ;   // R10 (store appropriate initial value)
+  Stacks[i][STACKSIZE-11] = x	     ;   // R9 (store appropriate initial value)
+  Stacks[i][STACKSIZE-12] = x	     ;   // R8 (store appropriate initial value)
+  Stacks[i][STACKSIZE-13] = x	     ;   // R7 (store appropriate initial value)
+  Stacks[i][STACKSIZE-14] = x   	 ;   // R6 (store appropriate initial value)
+  Stacks[i][STACKSIZE-15] = x   	 ;   // R5 (store appropriate initial value)
+  Stacks[i][STACKSIZE-16] = x   	 ;   // R4 (store appropriate initial value)	-- Saved by you
 }
 
 
@@ -74,9 +75,7 @@ int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void), void(*Thread2)(voi
 									// For Thread 1: 
 										// 1: Set the default values in stack
 										// 2: Make ReturnAddress stored on stack to point to Thread 1
-									// For Thread 2: 
-										// 1: Set the default values in stack
-										// 2: Make ReturnAddress stored on stack to point to Thread 2
+
   
   RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
 									// Function call to end the critical section
@@ -125,4 +124,6 @@ extern void yield(void) __attribute__((naked));
 void yield(void)
 {
 						// Gain privileged access
+    //Do this by changing the startup file and changing the SVC Handler vector to point to the Systick_Handler
+    //^That should be the whole function
 }

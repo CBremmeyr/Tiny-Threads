@@ -1,4 +1,5 @@
-// ===== Include appropriate header files =====
+#include <stdio.h>
+#include "msp.h"
 
 // ===== This is the kernel that will setup everything and run the scheduler ======
 
@@ -13,24 +14,6 @@ struct __FILE { int handle; };
 FILE __stdin = {0};
 FILE __stdout = {1};
 FILE __stderr = {2};
-
-// ====== Called by C library console / file output =======
-int fputc(int c, FILE *f)
-{
-    
-				// Write character to console using UART_Send()
-
-			// Return the character sent
-}
-
-// ====== For using printf() with format specifiers ======
-int fputs(const char *_ptr, register FILE *_fp)
-{
-    
-    len = UART_MSend(_ptr);     // Send a string using UART_MSend()
-
-                 // Return the length of the string
-}
 
 
 // ====== GPIO_Init() =======

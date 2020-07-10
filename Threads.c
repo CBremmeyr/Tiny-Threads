@@ -19,11 +19,19 @@ void Thread0(void)
 
 
 // ===== Thread 1 =====
-// ===== Responsible for printing message to the terminal window =====
-// ===== Locks need to be implemented for this thread =====
-// ===== Control needs to be given up voluntarily by this thread using yield() =====
+// ===== Responsible for toggling on-board RED ONLY LED infinitely ====
+// ===== Use BIT-BANDING approach to reference the LED =====
+// ===== Control taken away pre-emtively by the KERNEL =====
 void Thread1(void)
 {
+
+    /*RC3
+     * the code below was left as a reference but should be changed for LED purposes
+     *
+     */
+    int* threadlock;
+    int count;
+    //^^^^^THIS IS BULLSHIt^^^^^^ (NEEDED TO COMPILE)
   
   while(1)
   {
@@ -41,23 +49,4 @@ void Thread1(void)
 }
 
 
-// ===== Thread 2 =====
-// ===== Responsible for printing message to the terminal window =====
-// ===== Locks need to be implemented for this thread =====
-// ===== Control needs to be given up voluntarily by this thread using yield() =====
-void Thread2(void)
-{
-  while(1)
-  {
-   if(Lock_Acquire(&threadlock))		// Try to acquire lock and if successful
-   {
-    printf("\n\rEntered");
-    yield();					// Give up control voluntarily (context switch "interrupt")
-
-    printf(" Thread 2");
-    Lock_Release(&threadlock);			// Release lock
-   }
-   yield();                		// Give up control voluntarily (context switch "interrupt")
-  }
-}
 
