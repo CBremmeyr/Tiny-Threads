@@ -52,6 +52,7 @@ Mkfile.old
 dkms.conf
 /Debug/
 
-# Backup source code files
+# Ignore tool output
 *.c~
 *.h~
+static_err.txt
