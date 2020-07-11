@@ -12,7 +12,7 @@ void Thread0(void)
 {
   while(1)
   {
-      P2->OUT ^= 0x07;
+      P2->OUT ^= 0x04;
       __delay_cycles(500000); //TODO does this break the code?
   }
   

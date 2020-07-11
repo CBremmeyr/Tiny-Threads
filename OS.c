@@ -45,22 +45,22 @@ void OS_Init(void)
 void SetInitialStack(int i){
 
   tcbs[i].sp = &Stacks[i][STACKSIZE-16]; // thread stack pointer
-  Stacks[i][STACKSIZE-1]  =	0x0	     ;   // XPSR (store appropriate initial value) 	-- Saved by Exception
-  // Skip space for ReturnAddress
-  Stacks[i][STACKSIZE-3]  =	0x00     ;   // R14 (store appropriate initial value)
-  Stacks[i][STACKSIZE-4]  =	0x00     ;   // R12 (store appropriate initial value)
-  Stacks[i][STACKSIZE-5]  =	0x00     ;   // R3 (store appropriate initial value)
-  Stacks[i][STACKSIZE-6]  =	0x00     ;   // R2 (store appropriate initial value)
-  Stacks[i][STACKSIZE-7]  =	0x00     ;   // R1 (store appropriate initial value)
-  Stacks[i][STACKSIZE-8]  =	0x00     ;   // R0 (store appropriate initial value)	-- Saved by Exception
-  Stacks[i][STACKSIZE-9]  =	0x00     ;   // R11 (store appropriate initial value)	-- Saved by you
-  Stacks[i][STACKSIZE-10] = 0x00     ;   // R10 (store appropriate initial value)
-  Stacks[i][STACKSIZE-11] = 0x00	 ;   // R9 (store appropriate initial value)
-  Stacks[i][STACKSIZE-12] = 0x00	 ;   // R8 (store appropriate initial value)
-  Stacks[i][STACKSIZE-13] = 0x00	 ;   // R7 (store appropriate initial value)
-  Stacks[i][STACKSIZE-14] = 0x05   	 ;   // R6 (store appropriate initial value)
-  Stacks[i][STACKSIZE-15] = 0x00   	 ;   // R5 (store appropriate initial value)
-  Stacks[i][STACKSIZE-16] = 0x08   	 ;   // R4 (store appropriate initial value)	-- Saved by you
+  Stacks[i][STACKSIZE-1]  =	0x0F      ;   // XPSR - SysTick Interrupt   	-- Saved by Exception
+  // Skipped space for ReturnAddress
+  Stacks[i][STACKSIZE-3]  =	0xFFFFFFF9;   // R14 (LR) - Indicates Interrupt return
+  Stacks[i][STACKSIZE-4]  =	0x00      ;   // R12 (General Register)
+  Stacks[i][STACKSIZE-5]  =	0x00      ;   // R3  (General Register)
+  Stacks[i][STACKSIZE-6]  =	0x00      ;   // R2  (General Register)
+  Stacks[i][STACKSIZE-7]  =	0x00      ;   // R1  (General Register)
+  Stacks[i][STACKSIZE-8]  =	0x00      ;   // R0  (General Register)	    -- Saved by Exception
+  Stacks[i][STACKSIZE-9]  =	0x00      ;   // R11 (General Register)
+  Stacks[i][STACKSIZE-10] = 0x00      ;   // R10 (General Register)
+  Stacks[i][STACKSIZE-11] = 0x00	  ;   // R9  (General Register)
+  Stacks[i][STACKSIZE-12] = 0x00	  ;   // R8  (General Register)
+  Stacks[i][STACKSIZE-13] = 0x00	  ;   // R7  (General Register)
+  Stacks[i][STACKSIZE-14] = 0x05   	  ;   // R6  (General Register)
+  Stacks[i][STACKSIZE-15] = 0x00   	  ;   // R5  (General Register)
+  Stacks[i][STACKSIZE-16] = 0x08   	  ;   // R4  (General Register)
 }
 
 

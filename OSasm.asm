@@ -18,7 +18,7 @@
 OS_DisableInterrupts:  .asmfunc			; Complete this
 
     CPSID i  ;PRIMASK
-    CPSID f  ;FAULTMASK
+    ;CPSID f  ;FAULTMASK	;TODO delete this line I do not think it is needed
 	BX LR
 
     .endasmfunc
@@ -27,7 +27,7 @@ OS_DisableInterrupts:  .asmfunc			; Complete this
 OS_EnableInterrupts:  .asmfunc			; Complete this
         
 	CPSIE i    ;PRIMASK
-	CPSIE f    ;FAULTMASK
+	;CPSIE f    ;FAULTMASK ;TODO delete this line I dont think it is needed
 	BX LR
 		
     .endasmfunc
@@ -56,7 +56,7 @@ SysTick_Handler:  .asmfunc     ; 1) Handler automatically saves R0-R3,R12,LR,PC,
 	POP   {R0-R3}			   ; 6) Restore regs r0-3
 	POP   {R12}				   ; 7) Restore reg r12
 	POP   {LR}    	           ; 8) Restore LR and discard LR from initial stack
-    POP   {LR}    			   ; 9) Restore return address and store it in LR (start location)
+    POP   {R1}    			   ; 9) Restore return address and store it in LR (start location)
 	POP	  {R1}
 	PUSH  {LR}
 	BL	  OS_EnableInterrupts  ;11) Enable interrupt mechanism

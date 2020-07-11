@@ -29,10 +29,10 @@ FILE __stderr = {2};
 void GPIO_Init(void)
 {
     //RGB LED
-    P2SEL0  &= ~0x07;   //GPIO
-    P2SEL1  &= ~0x07;
-    P2->DIR |=  0x07;   //Output
-    P2->OUT &= ~0x07;   //Off
+    P2SEL0  &= ~0x04;   //GPIO
+    P2SEL1  &= ~0x04;
+    P2->DIR |=  0x04;   //Output
+    P2->OUT &= ~0x04;   //Off
 
     //RED LED
     P1SEL0  &= ~0x01;   //GPIO
