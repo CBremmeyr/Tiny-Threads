@@ -1,18 +1,37 @@
-#include "msp.h"
+/**
+ * OS.h
+ *
+ * Author(s): Corbin Bremmeyr, Richard Critchlow
+ * Date: 11 July 2020
+ *
+ * Library API funcitons. Alows user to setup and use user-space threads
+ */
 
+// Header gaurd start
 #ifndef OS_H_
 #define OS_H_
 
-// fill these depending on your clock
+#define NUMTHREADS  2       // Maximum number of threads
+#define STACKSIZE   100     // Number of 32-bit words in stack
+
 #define TIME_1MS    3000
-#define TIME_2MS  	6000	// This is what you should pass as the Timeslice value
+#define TIME_2MS    6000
 
+// ===== OS_Init =====
+// Disable interrupts until OS_Launch(), setup SysTick timer used by scheduler
 void OS_Init(void);
-void SetInitialStack(int i);
-int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void));
-void OS_Launch(uint32_t theTimeSlice);
-int32_t StartCritical(void);
-void EndCritical(int32_t primask);
-void yield(void);
 
+// ====== OS_AddThread ======
+// Add three foreground threads to the scheduler in a Round-Robin fashion
+// Inputs: three pointers to a void/void foreground tasks
+// Outputs: 1 if successful, 0 if this thread can not be added
+int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void));
+
+// ===== OS_Launch ======
+// Start the scheduler, Enable interrupts
+// Inputs: Time (ms) to give each thread to run before preemtivly changing threads
+void OS_Launch(uint32_t theTimeSlice);
+
+// Header gaurd end
 #endif
+

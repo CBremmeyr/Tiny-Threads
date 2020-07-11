@@ -1,81 +1,49 @@
+/**
+ * Kernel.c
+ *
+ * Author(s): Corbin Bremmeyr, Richard Critchlow
+ * Date: 11 July 2020
+ *
+ * System entry point and initialization
+ */
 
-//Standard Libraries
+// Standard Libraries
 #include <stdio.h>
 #include "msp.h"
 
-//Project Libraries
+// Project Libraries
 #include "OS.h"
 #include "Threads.h"
 
-// ===== This is the kernel that will setup everything and run the scheduler ======
-
-
-//Defines
-#define TIMESLICE   6000      //2ms @ 3MHz used for Thread context switch time in clockcycles
-
-//Static Variable
-unsigned threadlock;            // Variable Lock
-
-// Code below is the interface to the C standard I/O library
-// All the I/O are directed to the console which is UART0
-struct __FILE { int handle; };
-FILE __stdin = {0};
-FILE __stdout = {1};
-FILE __stderr = {2};
-
-
-//Initializes any peripherals
-//Here it initializes the Onboard LEDs
+// Initializes peripherals
 void GPIO_Init(void)
 {
-    //RGB LED
-    P2SEL0  &= ~0x04;   //GPIO
+    // RGB LED
+    P2SEL0  &= ~0x04;   // Pin mode: GPIO
     P2SEL1  &= ~0x04;
-    P2->DIR |=  0x04;   //Output
-    P2->OUT &= ~0x04;   //Off
+    P2->DIR |=  0x04;   // Direction: Output
+    P2->OUT &= ~0x04;   // State: Off
 
-    //RED LED
-    P1SEL0  &= ~0x01;   //GPIO
+    // Red LED
+    P1SEL0  &= ~0x01;   //Pin mode: GPIO
     P1SEL1  &= ~0x01;
-    P1->DIR |=  0x01;   //Output
-    P1->OUT &= ~0x01;   //Off
+    P1->DIR |=  0x01;   // Direction: Output
+    P1->OUT &= ~0x01;   // State: Off
 }
 
-
-// ======== Function to initialize LOCK (you need to modify) =============
-void Lock_Init(unsigned *lock)
-{
-    ;
-}
-
-// ======= Function to acquire the lock to be written in LockAcquire.asm ======
-unsigned Lock_Acquire(unsigned *lock)
-{
-  return 1; // always succeeds
-}
-
-// ======== Function to release LOCK (you need to modify) ===========
-void Lock_Release(unsigned *lock)
-{
-	;
-}
-
-
-// ======= MAIN =========
+// ======= Entry Point =======
 int main(void)
 {
+    // Stop watchdog timer
+    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
-    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;     // stop watchdog timer
-                                                    // Initialize the global thread lock
-    OS_Init();                                      // Initialize OS
-    GPIO_Init();                                    // Initialize GPIO peripheral
+    OS_Init();      // Initialize OS
+    GPIO_Init();    // Initialize GPIO peripheral
 
-	OS_AddThreads(Thread0, Thread1);		    // Add Threads to the list
-	OS_Launch(TIME_2MS);					// Launch OS
+    OS_AddThreads(Thread0, Thread1);    // Add Threads to OS
+    OS_Launch(TIME_2MS);                // Launch OS
 
-  return 0;            // This never executes
-
+    // This never executes
+    return 0;
 }
-
-
 

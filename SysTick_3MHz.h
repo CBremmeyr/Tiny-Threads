@@ -96,5 +96,3 @@ void delay_uS(uint16_t usec);
 
 #endif /* SYSTICK_48MHZ_H_ */
 
-
-
