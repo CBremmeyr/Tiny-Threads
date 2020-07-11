@@ -1,5 +1,4 @@
 #include "msp.h"
-#include "SysTick_3MHz.h"
 
 // ===== Function prototypes of functions written in OSasm.asm =====
 void OS_DisableInterrupts();
@@ -32,9 +31,10 @@ int32_t Stacks[NUMTHREADS][STACKSIZE];	// 2-dimensional array implemented as STA
 void OS_Init(void)
 {
     OS_DisableInterrupts();
-    initSysTick(1);
-    SCB -> SHP[1] = (SCB -> SHP[1] & 0x00FFFFFF) | 0xE0000000;          // Set priority 7 so that it allows threads to run
+    SysTick->CTRL = 0; //disable SysTick
+    SysTick->CTRL = 0x06; //interrupts, main CLK
 
+    SCB -> SHP[1] = (SCB -> SHP[1] & 0x00FFFFFF) | 0xE0000000;          // Set priority 7 so that it allows threads to run
 }
 
 
@@ -47,20 +47,20 @@ void SetInitialStack(int i){
   tcbs[i].sp = &Stacks[i][STACKSIZE-16]; // thread stack pointer
   Stacks[i][STACKSIZE-1]  =	0x0	     ;   // XPSR (store appropriate initial value) 	-- Saved by Exception
   // Skip space for ReturnAddress
-  Stacks[i][STACKSIZE-3]  =	0x2      ;   // R14 (store appropriate initial value)
-  Stacks[i][STACKSIZE-4]  =	0x3	     ;   // R12 (store appropriate initial value)
-  Stacks[i][STACKSIZE-5]  =	0x4	     ;   // R3 (store appropriate initial value)
-  Stacks[i][STACKSIZE-6]  =	0x5	     ;   // R2 (store appropriate initial value)
-  Stacks[i][STACKSIZE-7]  =	0x6	     ;   // R1 (store appropriate initial value)
-  Stacks[i][STACKSIZE-8]  =	0x7	     ;   // R0 (store appropriate initial value)	-- Saved by Exception
-  Stacks[i][STACKSIZE-9]  =	0x8	     ;   // R11 (store appropriate initial value)	-- Saved by you
-  Stacks[i][STACKSIZE-10] = 0x9	     ;   // R10 (store appropriate initial value)
-  Stacks[i][STACKSIZE-11] = 0x10	 ;   // R9 (store appropriate initial value)
-  Stacks[i][STACKSIZE-12] = 0x20	 ;   // R8 (store appropriate initial value)
-  Stacks[i][STACKSIZE-13] = 0x30	 ;   // R7 (store appropriate initial value)
-  Stacks[i][STACKSIZE-14] = 0x35   	 ;   // R6 (store appropriate initial value)
-  Stacks[i][STACKSIZE-15] = 0x40   	 ;   // R5 (store appropriate initial value)
-  Stacks[i][STACKSIZE-16] = 0x88   	 ;   // R4 (store appropriate initial value)	-- Saved by you
+  Stacks[i][STACKSIZE-3]  =	0x00     ;   // R14 (store appropriate initial value)
+  Stacks[i][STACKSIZE-4]  =	0x00     ;   // R12 (store appropriate initial value)
+  Stacks[i][STACKSIZE-5]  =	0x00     ;   // R3 (store appropriate initial value)
+  Stacks[i][STACKSIZE-6]  =	0x00     ;   // R2 (store appropriate initial value)
+  Stacks[i][STACKSIZE-7]  =	0x00     ;   // R1 (store appropriate initial value)
+  Stacks[i][STACKSIZE-8]  =	0x00     ;   // R0 (store appropriate initial value)	-- Saved by Exception
+  Stacks[i][STACKSIZE-9]  =	0x00     ;   // R11 (store appropriate initial value)	-- Saved by you
+  Stacks[i][STACKSIZE-10] = 0x00     ;   // R10 (store appropriate initial value)
+  Stacks[i][STACKSIZE-11] = 0x00	 ;   // R9 (store appropriate initial value)
+  Stacks[i][STACKSIZE-12] = 0x00	 ;   // R8 (store appropriate initial value)
+  Stacks[i][STACKSIZE-13] = 0x00	 ;   // R7 (store appropriate initial value)
+  Stacks[i][STACKSIZE-14] = 0x05   	 ;   // R6 (store appropriate initial value)
+  Stacks[i][STACKSIZE-15] = 0x00   	 ;   // R5 (store appropriate initial value)
+  Stacks[i][STACKSIZE-16] = 0x08   	 ;   // R4 (store appropriate initial value)	-- Saved by you
 }
 
 
@@ -77,11 +77,11 @@ int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void)){
     tcbs[1].next = &tcbs[0];
 
     SetInitialStack(0);
-    Stacks[0][STACKSIZE - 2] = Thread0;								// For Thread 0:
+    Stacks[0][STACKSIZE - 2] = (uint32_t) Thread0;								// For Thread 0:
 									// 1: Set the default values in stack
 									// 2: Make ReturnAddress stored on stack to point to Thread 0
     SetInitialStack(1);
-	Stacks[1][STACKSIZE - 2] = Thread1;								// For Thread 1:
+	Stacks[1][STACKSIZE - 2] = (uint32_t) Thread1;								// For Thread 1:
 									// 1: Set the default values in stack
 									// 2: Make ReturnAddress stored on stack to point to Thread 1
 
@@ -101,8 +101,8 @@ int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void)){
 //         (maximum of 24 bits)
 void OS_Launch(uint32_t theTimeSlice) //TODO change to take input as a float mS
 {
-    setSysTickInterrupt_mS(2);	   // Load the reload value for Systick Timer
-                                   // Enable the Timer, Use core clock and arm interrupt
+    SysTick->LOAD = theTimeSlice; //reload Value
+    SysTick->CTRL |= 0x01; //SysTick Enable
     StartOS();                     // start on the first task
 }
 
