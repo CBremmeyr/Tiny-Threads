@@ -45,8 +45,8 @@ void OS_Init(void)
 void SetInitialStack(int i){
 
   tcbs[i].sp = &Stacks[i][STACKSIZE-16]; // thread stack pointer
-  Stacks[i][STACKSIZE-1]  =	0x0F      ;   // XPSR - SysTick Interrupt   	-- Saved by Exception
-  // Skipped space for ReturnAddress
+  Stacks[i][STACKSIZE-1]  =	0x2100000F      ;   // XPSR - SysTick Interrupt   	-- Saved by Exception
+  //specific initialization for each thread      (ReturnAddress)
   Stacks[i][STACKSIZE-3]  =	0xFFFFFFF9;   // R14 (LR) - Indicates Interrupt return
   Stacks[i][STACKSIZE-4]  =	0x00      ;   // R12 (General Register)
   Stacks[i][STACKSIZE-5]  =	0x00      ;   // R3  (General Register)
@@ -70,28 +70,18 @@ void SetInitialStack(int i){
 // Outputs: 1 if successful, 0 if this thread can not be added
 int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void)){
 
-    //int32_t status;
 
-									//TODO?// Function call to start the critical section
     tcbs[0].next = &tcbs[1];
     tcbs[1].next = &tcbs[0];
 
     SetInitialStack(0);
-    Stacks[0][STACKSIZE - 2] = (uint32_t) Thread0;								// For Thread 0:
-									// 1: Set the default values in stack
-									// 2: Make ReturnAddress stored on stack to point to Thread 0
+    Stacks[0][STACKSIZE - 2] = (uint32_t) Thread0;
     SetInitialStack(1);
-	Stacks[1][STACKSIZE - 2] = (uint32_t) Thread1;								// For Thread 1:
-									// 1: Set the default values in stack
-									// 2: Make ReturnAddress stored on stack to point to Thread 1
+	Stacks[1][STACKSIZE - 2] = (uint32_t) Thread1;
 
-
-
-  
     RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
-							//TODO? Function call to end the critical section
 
-    return 1;               // successful
+    return 1;
 }
 
 
@@ -101,33 +91,9 @@ int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void)){
 //         (maximum of 24 bits)
 void OS_Launch(uint32_t theTimeSlice) //TODO change to take input as a float mS
 {
-    SysTick->LOAD = theTimeSlice; //reload Value
-    SysTick->CTRL |= 0x01; //SysTick Enable
-    StartOS();                     // start on the first task
-}
-
-
-// ====== StartCritical ======
-// Make a copy of previous I bit, disable interrupts
-// Outputs: previous I bit
-extern int32_t StartCritical(void) __attribute__((naked));
-int32_t StartCritical(void)
-{
-								// Save old status
-								// Disable interrupt mechanism in assembly
-								// Return to the calling function  
-    return 1;
-}
-
-
-// ====== EndCritical ======
-// Using the copy of previous I bit, restore I bit to previous value
-// Inputs:  previous I bit
-extern void EndCritical(int32_t primask) __attribute__((naked));
-void EndCritical(int32_t primask)
-{
-								// Enable interrupt mechanism in assembly
-								// Return to the calling function  
+    SysTick->LOAD = theTimeSlice;   //reload Value
+    SysTick->CTRL |= 0x01;          //SysTick Enable
+    StartOS();                      // start on the first task
 }
 
 
