@@ -9,7 +9,7 @@ void StartOS();
 
 
 #define NUMTHREADS  2             // Maximum number of threads
-#define STACKSIZE   512           // Number of 32-bit words in stack (You will have to keep increasing intelligently if code does not work)
+#define STACKSIZE   100           // Number of 32-bit words in stack (You will have to keep increasing intelligently if code does not work)
 
 // ===== Structure to store state of thread ===== Thread Control Block
 struct tcb
@@ -41,12 +41,13 @@ void OS_Init(void)
 
 
 // ===== Sets default values in STACK ======
-// Inputs: i is the threadnumber
+// Inputs: i is the thread number
 void SetInitialStack(int i){
 
   tcbs[i].sp = &Stacks[i][STACKSIZE-16]; // thread stack pointer
-  Stacks[i][STACKSIZE-1]  =	0x1	     ;   // XPSR (store appropriate initial value) 	-- Saved by Exception
-  Stacks[i][STACKSIZE-3]  =	0x2        ;   // R14 (store appropriate initial value)
+  Stacks[i][STACKSIZE-1]  =	0x0	     ;   // XPSR (store appropriate initial value) 	-- Saved by Exception
+  // Skip space for ReturnAddress
+  Stacks[i][STACKSIZE-3]  =	0x2      ;   // R14 (store appropriate initial value)
   Stacks[i][STACKSIZE-4]  =	0x3	     ;   // R12 (store appropriate initial value)
   Stacks[i][STACKSIZE-5]  =	0x4	     ;   // R3 (store appropriate initial value)
   Stacks[i][STACKSIZE-6]  =	0x5	     ;   // R2 (store appropriate initial value)
@@ -54,9 +55,9 @@ void SetInitialStack(int i){
   Stacks[i][STACKSIZE-8]  =	0x7	     ;   // R0 (store appropriate initial value)	-- Saved by Exception
   Stacks[i][STACKSIZE-9]  =	0x8	     ;   // R11 (store appropriate initial value)	-- Saved by you
   Stacks[i][STACKSIZE-10] = 0x9	     ;   // R10 (store appropriate initial value)
-  Stacks[i][STACKSIZE-11] = 0x10	     ;   // R9 (store appropriate initial value)
-  Stacks[i][STACKSIZE-12] = 0x20	     ;   // R8 (store appropriate initial value)
-  Stacks[i][STACKSIZE-13] = 0x30	     ;   // R7 (store appropriate initial value)
+  Stacks[i][STACKSIZE-11] = 0x10	 ;   // R9 (store appropriate initial value)
+  Stacks[i][STACKSIZE-12] = 0x20	 ;   // R8 (store appropriate initial value)
+  Stacks[i][STACKSIZE-13] = 0x30	 ;   // R7 (store appropriate initial value)
   Stacks[i][STACKSIZE-14] = 0x35   	 ;   // R6 (store appropriate initial value)
   Stacks[i][STACKSIZE-15] = 0x40   	 ;   // R5 (store appropriate initial value)
   Stacks[i][STACKSIZE-16] = 0x88   	 ;   // R4 (store appropriate initial value)	-- Saved by you
@@ -76,11 +77,11 @@ int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void)){
     tcbs[1].next = &tcbs[0];
 
     SetInitialStack(0);
-    Stacks[0][STACKSIZE - 3] = (int32_t) Thread0;								// For Thread 0:
+    Stacks[0][STACKSIZE - 2] = Thread0;								// For Thread 0:
 									// 1: Set the default values in stack
 									// 2: Make ReturnAddress stored on stack to point to Thread 0
     SetInitialStack(1);
-	Stacks[1][STACKSIZE - 3] = (int32_t) Thread1;								// For Thread 1:
+	Stacks[1][STACKSIZE - 2] = Thread1;								// For Thread 1:
 									// 1: Set the default values in stack
 									// 2: Make ReturnAddress stored on stack to point to Thread 1
 
