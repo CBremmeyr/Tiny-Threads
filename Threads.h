@@ -7,20 +7,20 @@
  * Source file for the individual thread functions
  */
 
-// Header gaurd start
+// Header guard start
 #ifndef THREADS_H_
 #define THREADS_H_
 
 // ===== Thread 0 =====
-//  Responsible for toggling on-board GREEN RGB LED infinitely
+//  Responsible for toggling on-board blue RGB LED infinitely
 //  Control taken away pre-emtively by the KERNEL
 void Thread0(void);
 
 // ===== Thread 1 =====
-// Responsible for toggling on-board RED ONLY LED infinitely
+// Responsible for toggling on-board red ONLY LED infinitely
 // Control taken away pre-emtively by the KERNEL
 void Thread1(void);
 
-// Header gaurd end
+// Header guard end
 #endif
 
