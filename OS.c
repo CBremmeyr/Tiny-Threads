@@ -45,22 +45,22 @@ void OS_Init(void)
 void SetInitialStack(int i){
 
   tcbs[i].sp = &Stacks[i][STACKSIZE-16]; // thread stack pointer
-  Stacks[i][STACKSIZE-1]  =	0x2100000F      ;   // XPSR - SysTick Interrupt   	-- Saved by Exception
+  Stacks[i][STACKSIZE-1]  =	0x21000000      ;   // XPSR - SysTick Interrupt   	-- Saved by Exception
   //specific initialization for each thread      (ReturnAddress)
-  Stacks[i][STACKSIZE-3]  =	0xFFFFFFF9;   // R14 (LR) - Indicates Interrupt return
-  Stacks[i][STACKSIZE-4]  =	0x00      ;   // R12 (General Register)
-  Stacks[i][STACKSIZE-5]  =	0x00      ;   // R3  (General Register)
-  Stacks[i][STACKSIZE-6]  =	0x00      ;   // R2  (General Register)
-  Stacks[i][STACKSIZE-7]  =	0x00      ;   // R1  (General Register)
-  Stacks[i][STACKSIZE-8]  =	0x00      ;   // R0  (General Register)	    -- Saved by Exception
-  Stacks[i][STACKSIZE-9]  =	0x00      ;   // R11 (General Register)
-  Stacks[i][STACKSIZE-10] = 0x00      ;   // R10 (General Register)
-  Stacks[i][STACKSIZE-11] = 0x00	  ;   // R9  (General Register)
-  Stacks[i][STACKSIZE-12] = 0x00	  ;   // R8  (General Register)
-  Stacks[i][STACKSIZE-13] = 0x00	  ;   // R7  (General Register)
-  Stacks[i][STACKSIZE-14] = 0x05   	  ;   // R6  (General Register)
-  Stacks[i][STACKSIZE-15] = 0x00   	  ;   // R5  (General Register)
-  Stacks[i][STACKSIZE-16] = 0x08   	  ;   // R4  (General Register)
+  Stacks[i][STACKSIZE-3]  =	0x10      ;   // R14 (LR) - Indicates Interrupt return
+  Stacks[i][STACKSIZE-4]  =	0x20      ;   // R12 (General Register)
+  Stacks[i][STACKSIZE-5]  =	0x30      ;   // R3  (General Register)
+  Stacks[i][STACKSIZE-6]  =	0x40      ;   // R2  (General Register)
+  Stacks[i][STACKSIZE-7]  =	0x50      ;   // R1  (General Register)
+  Stacks[i][STACKSIZE-8]  =	0x60      ;   // R0  (General Register)	    -- Saved by Exception
+  Stacks[i][STACKSIZE-9]  =	0x70      ;   // R11 (General Register)
+  Stacks[i][STACKSIZE-10] = 0x80      ;   // R10 (General Register)
+  Stacks[i][STACKSIZE-11] = 0x90	  ;   // R9  (General Register)
+  Stacks[i][STACKSIZE-12] = 0x11	  ;   // R8  (General Register)
+  Stacks[i][STACKSIZE-13] = 0x22	  ;   // R7  (General Register)
+  Stacks[i][STACKSIZE-14] = 0x33   	  ;   // R6  (General Register)
+  Stacks[i][STACKSIZE-15] = 0x44   	  ;   // R5  (General Register)
+  Stacks[i][STACKSIZE-16] = 0x55   	  ;   // R4  (General Register)
 }
 
 
@@ -75,8 +75,10 @@ int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void)){
     tcbs[1].next = &tcbs[0];
 
     SetInitialStack(0);
+    //Stacks[0][STACKSIZE - 3] = (uint32_t) Thread0;
     Stacks[0][STACKSIZE - 2] = (uint32_t) Thread0;
     SetInitialStack(1);
+	Stacks[1][STACKSIZE - 3] = (uint32_t) Thread1;
 	Stacks[1][STACKSIZE - 2] = (uint32_t) Thread1;
 
     RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
