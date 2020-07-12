@@ -54,3 +54,9 @@ dkms.conf
 # CCS settings
 .launches/*
 .settings/org.eclipse.core.resources.prefs
+
+# Ignore tool output
+*.c~
+*.h~
+static_err.txt
+
