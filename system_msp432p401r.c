@@ -87,7 +87,7 @@
 /*----------------------------------------------------------------------------
    Clock Variable definitions
  *---------------------------------------------------------------------------*/
-uint32_t SystemCoreClock = __SYSTEM_CLOCK;  /*!< System Clock Frequency (Core Clock)*/
+uint32_t SystemCoreClock = __SYSTEM_CLOCK;	/*!< System Clock Frequency (Core Clock) */
 
 /**
  * Update SystemCoreClock variable
@@ -100,7 +100,8 @@ uint32_t SystemCoreClock = __SYSTEM_CLOCK;  /*!< System Clock Frequency (Core Cl
  */
 void SystemCoreClockUpdate(void)
 {
-    uint32_t source = 0, divider = 0, dividerValue = 0, centeredFreq = 0, calVal = 0;
+    uint32_t source = 0, divider = 0, dividerValue = 0, centeredFreq =
+	0, calVal = 0;
     int16_t dcoTune = 0;
     float dcoConst = 0.0;
 
@@ -108,137 +109,110 @@ void SystemCoreClockUpdate(void)
     dividerValue = 1 << divider;
     source = CS->CTL1 & CS_CTL1_SELM_MASK;
 
-    switch(source)
-    {
+    switch (source) {
     case CS_CTL1_SELM__LFXTCLK:
-        if(BITBAND_PERI(CS->IFG, CS_IFG_LFXTIFG_OFS))
-        {
-            // Clear interrupt flag
-            CS->KEY = CS_KEY_VAL;
-            CS->CLRIFG |= CS_CLRIFG_CLR_LFXTIFG;
-            CS->KEY = 1;
+	if (BITBAND_PERI(CS->IFG, CS_IFG_LFXTIFG_OFS)) {
+	    // Clear interrupt flag
+	    CS->KEY = CS_KEY_VAL;
+	    CS->CLRIFG |= CS_CLRIFG_CLR_LFXTIFG;
+	    CS->KEY = 1;
 
-            if(BITBAND_PERI(CS->IFG, CS_IFG_LFXTIFG_OFS))
-            {
-                if(BITBAND_PERI(CS->CLKEN, CS_CLKEN_REFOFSEL_OFS))
-                {
-                    SystemCoreClock = (128000 / dividerValue);
-                }
-                else
-                {
-                    SystemCoreClock = (32000 / dividerValue);
-                }
-            }
-            else
-            {
-                SystemCoreClock = __LFXT / dividerValue;
-            }
-        }
-        else
-        {
-            SystemCoreClock = __LFXT / dividerValue;
-        }
-        break;
+	    if (BITBAND_PERI(CS->IFG, CS_IFG_LFXTIFG_OFS)) {
+		if (BITBAND_PERI(CS->CLKEN, CS_CLKEN_REFOFSEL_OFS)) {
+		    SystemCoreClock = (128000 / dividerValue);
+		} else {
+		    SystemCoreClock = (32000 / dividerValue);
+		}
+	    } else {
+		SystemCoreClock = __LFXT / dividerValue;
+	    }
+	} else {
+	    SystemCoreClock = __LFXT / dividerValue;
+	}
+	break;
     case CS_CTL1_SELM__VLOCLK:
-        SystemCoreClock = __VLOCLK / dividerValue;
-        break;
+	SystemCoreClock = __VLOCLK / dividerValue;
+	break;
     case CS_CTL1_SELM__REFOCLK:
-        if (BITBAND_PERI(CS->CLKEN, CS_CLKEN_REFOFSEL_OFS))
-        {
-            SystemCoreClock = (128000 / dividerValue);
-        }
-        else
-        {
-            SystemCoreClock = (32000 / dividerValue);
-        }
-        break;
+	if (BITBAND_PERI(CS->CLKEN, CS_CLKEN_REFOFSEL_OFS)) {
+	    SystemCoreClock = (128000 / dividerValue);
+	} else {
+	    SystemCoreClock = (32000 / dividerValue);
+	}
+	break;
     case CS_CTL1_SELM__DCOCLK:
-        dcoTune = (CS->CTL0 & CS_CTL0_DCOTUNE_MASK) >> CS_CTL0_DCOTUNE_OFS;
-    
-        switch(CS->CTL0 & CS_CTL0_DCORSEL_MASK)
-        {
-        case CS_CTL0_DCORSEL_0:
-            centeredFreq = 1500000;
-            break;
-        case CS_CTL0_DCORSEL_1:
-            centeredFreq = 3000000;
-            break;
-        case CS_CTL0_DCORSEL_2:
-            centeredFreq = 6000000;
-            break;
-        case CS_CTL0_DCORSEL_3:
-            centeredFreq = 12000000;
-            break;
-        case CS_CTL0_DCORSEL_4:
-            centeredFreq = 24000000;
-            break;
-        case CS_CTL0_DCORSEL_5:
-            centeredFreq = 48000000;
-            break;
-        }
+	dcoTune = (CS->CTL0 & CS_CTL0_DCOTUNE_MASK) >> CS_CTL0_DCOTUNE_OFS;
 
-        if(dcoTune == 0)
-        {
-            SystemCoreClock = centeredFreq;
-        }
-        else
-        {
+	switch (CS->CTL0 & CS_CTL0_DCORSEL_MASK) {
+	case CS_CTL0_DCORSEL_0:
+	    centeredFreq = 1500000;
+	    break;
+	case CS_CTL0_DCORSEL_1:
+	    centeredFreq = 3000000;
+	    break;
+	case CS_CTL0_DCORSEL_2:
+	    centeredFreq = 6000000;
+	    break;
+	case CS_CTL0_DCORSEL_3:
+	    centeredFreq = 12000000;
+	    break;
+	case CS_CTL0_DCORSEL_4:
+	    centeredFreq = 24000000;
+	    break;
+	case CS_CTL0_DCORSEL_5:
+	    centeredFreq = 48000000;
+	    break;
+	}
 
-            if(dcoTune & 0x1000)
-            {
-                dcoTune = dcoTune | 0xF000;
-            }
+	if (dcoTune == 0) {
+	    SystemCoreClock = centeredFreq;
+	} else {
 
-            if (BITBAND_PERI(CS->CTL0, CS_CTL0_DCORES_OFS))
-            {
-                dcoConst = *((volatile const float *) &TLV->DCOER_CONSTK_RSEL04);
-                calVal = TLV->DCOER_FCAL_RSEL04;
-            }
-            /* Internal Resistor */
-            else
-            {
-                dcoConst = *((volatile const float *) &TLV->DCOIR_CONSTK_RSEL04);
-                calVal = TLV->DCOIR_FCAL_RSEL04;
-            }
+	    if (dcoTune & 0x1000) {
+		dcoTune = dcoTune | 0xF000;
+	    }
 
-            SystemCoreClock = (uint32_t) ((centeredFreq)
-                               / (1
-                                    - ((dcoConst * dcoTune)
-                                            / (8 * (1 + dcoConst * (768 - calVal))))));
-        }
-        break;
+	    if (BITBAND_PERI(CS->CTL0, CS_CTL0_DCORES_OFS)) {
+		dcoConst = *((volatile const float *)&TLV->DCOER_CONSTK_RSEL04);
+		calVal = TLV->DCOER_FCAL_RSEL04;
+	    }
+	    /* Internal Resistor */
+	    else {
+		dcoConst = *((volatile const float *)&TLV->DCOIR_CONSTK_RSEL04);
+		calVal = TLV->DCOIR_FCAL_RSEL04;
+	    }
+
+	    SystemCoreClock = (uint32_t) ((centeredFreq)
+					  / (1 - ((dcoConst * dcoTune)
+						  / (8 *
+						     (1 +
+						      dcoConst * (768 -
+								  calVal))))));
+	}
+	break;
     case CS_CTL1_SELM__MODOSC:
-        SystemCoreClock = __MODCLK / dividerValue;
-        break;
+	SystemCoreClock = __MODCLK / dividerValue;
+	break;
     case CS_CTL1_SELM__HFXTCLK:
-        if(BITBAND_PERI(CS->IFG, CS_IFG_HFXTIFG_OFS))
-        {
-            // Clear interrupt flag
-            CS->KEY = CS_KEY_VAL;
-            CS->CLRIFG |= CS_CLRIFG_CLR_HFXTIFG;
-            CS->KEY = 1;
+	if (BITBAND_PERI(CS->IFG, CS_IFG_HFXTIFG_OFS)) {
+	    // Clear interrupt flag
+	    CS->KEY = CS_KEY_VAL;
+	    CS->CLRIFG |= CS_CLRIFG_CLR_HFXTIFG;
+	    CS->KEY = 1;
 
-            if(BITBAND_PERI(CS->IFG, CS_IFG_HFXTIFG_OFS))
-            {
-                if(BITBAND_PERI(CS->CLKEN, CS_CLKEN_REFOFSEL_OFS))
-                {
-                    SystemCoreClock = (128000 / dividerValue);
-                }
-                else
-                {
-                    SystemCoreClock = (32000 / dividerValue);
-                }
-            }
-            else
-            {
-                SystemCoreClock = __HFXT / dividerValue;
-            }
-        }
-        else
-        {
-            SystemCoreClock = __HFXT / dividerValue;
-        }
-        break;
+	    if (BITBAND_PERI(CS->IFG, CS_IFG_HFXTIFG_OFS)) {
+		if (BITBAND_PERI(CS->CLKEN, CS_CLKEN_REFOFSEL_OFS)) {
+		    SystemCoreClock = (128000 / dividerValue);
+		} else {
+		    SystemCoreClock = (32000 / dividerValue);
+		}
+	    } else {
+		SystemCoreClock = __HFXT / dividerValue;
+	    }
+	} else {
+	    SystemCoreClock = __HFXT / dividerValue;
+	}
+	break;
     }
 }
 
@@ -262,140 +236,166 @@ void SystemCoreClockUpdate(void)
 void SystemInit(void)
 {
     // Enable FPU if used
-    #if (__FPU_USED == 1)                                  // __FPU_USED is defined in core_cm4.h
-    SCB->CPACR |= ((3UL << 10 * 2) |                       // Set CP10 Full Access
-                   (3UL << 11 * 2));                       // Set CP11 Full Access
-    #endif
+#if (__FPU_USED == 1)		// __FPU_USED is defined in core_cm4.h
+    SCB->CPACR |= ((3UL << 10 * 2) |	// Set CP10 Full Access
+		   (3UL << 11 * 2));	// Set CP11 Full Access
+#endif
 
-    #if (__HALT_WDT == 1)
-    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;            // Halt the WDT
-    #endif
+#if (__HALT_WDT == 1)
+    WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;	// Halt the WDT
+#endif
 
-    SYSCTL->SRAM_BANKEN = SYSCTL_SRAM_BANKEN_BNK7_EN;      // Enable all SRAM banks
+    SYSCTL->SRAM_BANKEN = SYSCTL_SRAM_BANKEN_BNK7_EN;	// Enable all SRAM banks
 
-    #if (__SYSTEM_CLOCK == 1500000)                        // 1.5 MHz
+#if (__SYSTEM_CLOCK == 1500000)	// 1.5 MHz
     // Default VCORE is LDO VCORE0 so no change necessary
 
     // Switches LDO VCORE0 to DCDC VCORE0 if requested
-    #if __REGULATOR
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+#if __REGULATOR
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
     PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_4;
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
-    #endif
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
+#endif
 
     // No flash wait states necessary
 
     // DCO = 1.5 MHz; MCLK = source
-    CS->KEY = CS_KEY_VAL;                                  // Unlock CS module for register access
-    CS->CTL0 = CS_CTL0_DCORSEL_0;                          // Set DCO to 1.5MHz
-    CS->CTL1 = (CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) | CS_CTL1_SELM__DCOCLK;  
-	                                                       // Select MCLK as DCO source
+    CS->KEY = CS_KEY_VAL;	// Unlock CS module for register access
+    CS->CTL0 = CS_CTL0_DCORSEL_0;	// Set DCO to 1.5MHz
+    CS->CTL1 =
+	(CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) |
+	CS_CTL1_SELM__DCOCLK;
+    // Select MCLK as DCO source
     CS->KEY = 0;
 
     // Set Flash Bank read buffering
-    FLCTL->BANK0_RDCTL = FLCTL->BANK0_RDCTL & ~(FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
-    FLCTL->BANK1_RDCTL = FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
+    FLCTL->BANK0_RDCTL =
+	FLCTL->BANK0_RDCTL & ~(FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
+    FLCTL->BANK1_RDCTL =
+	FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
 
-    #elif (__SYSTEM_CLOCK == 3000000)                      // 3 MHz
+#elif (__SYSTEM_CLOCK == 3000000)	// 3 MHz
     // Default VCORE is LDO VCORE0 so no change necessary
 
     // Switches LDO VCORE0 to DCDC VCORE0 if requested
-    #if __REGULATOR
-    while(PCM->CTL1 & PCM_CTL1_PMR_BUSY);
+#if __REGULATOR
+    while (PCM->CTL1 & PCM_CTL1_PMR_BUSY) ;
     PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_4;
-    while(PCM->CTL1 & PCM_CTL1_PMR_BUSY);
-    #endif
+    while (PCM->CTL1 & PCM_CTL1_PMR_BUSY) ;
+#endif
 
     // No flash wait states necessary
 
     // DCO = 3 MHz; MCLK = source
-    CS->KEY = CS_KEY_VAL;                                  // Unlock CS module for register access
-    CS->CTL0 = CS_CTL0_DCORSEL_1;                          // Set DCO to 1.5MHz
-    CS->CTL1 = (CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) | CS_CTL1_SELM__DCOCLK;  
-	                                                       // Select MCLK as DCO source
+    CS->KEY = CS_KEY_VAL;	// Unlock CS module for register access
+    CS->CTL0 = CS_CTL0_DCORSEL_1;	// Set DCO to 1.5MHz
+    CS->CTL1 =
+	(CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) |
+	CS_CTL1_SELM__DCOCLK;
+    // Select MCLK as DCO source
     CS->KEY = 0;
 
     // Set Flash Bank read buffering
-    FLCTL->BANK0_RDCTL = FLCTL->BANK0_RDCTL & ~(FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
-    FLCTL->BANK1_RDCTL = FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
+    FLCTL->BANK0_RDCTL =
+	FLCTL->BANK0_RDCTL & ~(FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
+    FLCTL->BANK1_RDCTL =
+	FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
 
-    #elif (__SYSTEM_CLOCK == 12000000)                     // 12 MHz
+#elif (__SYSTEM_CLOCK == 12000000)	// 12 MHz
     // Default VCORE is LDO VCORE0 so no change necessary
 
     // Switches LDO VCORE0 to DCDC VCORE0 if requested
-    #if __REGULATOR
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+#if __REGULATOR
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
     PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_4;
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
-    #endif
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
+#endif
 
     // No flash wait states necessary
 
     // DCO = 12 MHz; MCLK = source
-    CS->KEY = CS_KEY_VAL;                                  // Unlock CS module for register access
-    CS->CTL0 = CS_CTL0_DCORSEL_3;                          // Set DCO to 12MHz
-    CS->CTL1 = (CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) | CS_CTL1_SELM__DCOCLK;  
-	                                                       // Select MCLK as DCO source
+    CS->KEY = CS_KEY_VAL;	// Unlock CS module for register access
+    CS->CTL0 = CS_CTL0_DCORSEL_3;	// Set DCO to 12MHz
+    CS->CTL1 =
+	(CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) |
+	CS_CTL1_SELM__DCOCLK;
+    // Select MCLK as DCO source
     CS->KEY = 0;
 
     // Set Flash Bank read buffering
-    FLCTL->BANK0_RDCTL = FLCTL->BANK0_RDCTL & ~(FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
-    FLCTL->BANK1_RDCTL = FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
+    FLCTL->BANK0_RDCTL =
+	FLCTL->BANK0_RDCTL & ~(FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
+    FLCTL->BANK1_RDCTL =
+	FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
 
-    #elif (__SYSTEM_CLOCK == 24000000)                     // 24 MHz
+#elif (__SYSTEM_CLOCK == 24000000)	// 24 MHz
     // Default VCORE is LDO VCORE0 so no change necessary
 
     // Switches LDO VCORE0 to DCDC VCORE0 if requested
-    #if __REGULATOR
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+#if __REGULATOR
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
     PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_4;
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
-    #endif
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
+#endif
 
     // 1 flash wait state (BANK0 VCORE0 max is 12 MHz)
-    FLCTL->BANK0_RDCTL = (FLCTL->BANK0_RDCTL & ~FLCTL_BANK0_RDCTL_WAIT_MASK) | FLCTL_BANK0_RDCTL_WAIT_1;
-    FLCTL->BANK1_RDCTL = (FLCTL->BANK1_RDCTL & ~FLCTL_BANK1_RDCTL_WAIT_MASK) | FLCTL_BANK1_RDCTL_WAIT_1;
+    FLCTL->BANK0_RDCTL =
+	(FLCTL->BANK0_RDCTL & ~FLCTL_BANK0_RDCTL_WAIT_MASK) |
+	FLCTL_BANK0_RDCTL_WAIT_1;
+    FLCTL->BANK1_RDCTL =
+	(FLCTL->BANK1_RDCTL & ~FLCTL_BANK1_RDCTL_WAIT_MASK) |
+	FLCTL_BANK1_RDCTL_WAIT_1;
 
     // DCO = 24 MHz; MCLK = source
-    CS->KEY = CS_KEY_VAL;                                  // Unlock CS module for register access
-    CS->CTL0 = CS_CTL0_DCORSEL_4;                          // Set DCO to 24MHz
-    CS->CTL1 = (CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) | CS_CTL1_SELM__DCOCLK;  
-	                                                       // Select MCLK as DCO source
+    CS->KEY = CS_KEY_VAL;	// Unlock CS module for register access
+    CS->CTL0 = CS_CTL0_DCORSEL_4;	// Set DCO to 24MHz
+    CS->CTL1 =
+	(CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) |
+	CS_CTL1_SELM__DCOCLK;
+    // Select MCLK as DCO source
     CS->KEY = 0;
 
     // Set Flash Bank read buffering
-    FLCTL->BANK0_RDCTL = FLCTL->BANK0_RDCTL | (FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
-    FLCTL->BANK1_RDCTL = FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
+    FLCTL->BANK0_RDCTL =
+	FLCTL->BANK0_RDCTL | (FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
+    FLCTL->BANK1_RDCTL =
+	FLCTL->BANK1_RDCTL & ~(FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
 
-    #elif (__SYSTEM_CLOCK == 48000000)                     // 48 MHz
+#elif (__SYSTEM_CLOCK == 48000000)	// 48 MHz
     // Switches LDO VCORE0 to LDO VCORE1; mandatory for 48 MHz setting
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
     PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_1;
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
 
     // Switches LDO VCORE1 to DCDC VCORE1 if requested
-    #if __REGULATOR
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
+#if __REGULATOR
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
     PCM->CTL0 = PCM_CTL0_KEY_VAL | PCM_CTL0_AMR_5;
-    while((PCM->CTL1 & PCM_CTL1_PMR_BUSY));
-    #endif
+    while ((PCM->CTL1 & PCM_CTL1_PMR_BUSY)) ;
+#endif
 
     // 1 flash wait states (BANK0 VCORE1 max is 16 MHz, BANK1 VCORE1 max is 32 MHz)
-    FLCTL->BANK0_RDCTL = (FLCTL->BANK0_RDCTL & ~FLCTL_BANK0_RDCTL_WAIT_MASK) | FLCTL_BANK0_RDCTL_WAIT_1;
-    FLCTL->BANK1_RDCTL = (FLCTL->BANK1_RDCTL & ~FLCTL_BANK1_RDCTL_WAIT_MASK) | FLCTL_BANK1_RDCTL_WAIT_1;
+    FLCTL->BANK0_RDCTL =
+	(FLCTL->BANK0_RDCTL & ~FLCTL_BANK0_RDCTL_WAIT_MASK) |
+	FLCTL_BANK0_RDCTL_WAIT_1;
+    FLCTL->BANK1_RDCTL =
+	(FLCTL->BANK1_RDCTL & ~FLCTL_BANK1_RDCTL_WAIT_MASK) |
+	FLCTL_BANK1_RDCTL_WAIT_1;
 
     // DCO = 48 MHz; MCLK = source
-    CS->KEY = CS_KEY_VAL;                                  // Unlock CS module for register access
-    CS->CTL0 = CS_CTL0_DCORSEL_5;                          // Set DCO to 48MHz
-    CS->CTL1 = (CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) | CS_CTL1_SELM__DCOCLK;  
-	                                                       // Select MCLK as DCO source
+    CS->KEY = CS_KEY_VAL;	// Unlock CS module for register access
+    CS->CTL0 = CS_CTL0_DCORSEL_5;	// Set DCO to 48MHz
+    CS->CTL1 =
+	(CS->CTL1 & ~(CS_CTL1_SELM_MASK | CS_CTL1_DIVM_MASK)) |
+	CS_CTL1_SELM__DCOCLK;
+    // Select MCLK as DCO source
     CS->KEY = 0;
 
     // Set Flash Bank read buffering
-    FLCTL->BANK0_RDCTL = FLCTL->BANK0_RDCTL | (FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
-    FLCTL->BANK1_RDCTL = FLCTL->BANK1_RDCTL | (FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
-    #endif
+    FLCTL->BANK0_RDCTL =
+	FLCTL->BANK0_RDCTL | (FLCTL_BANK0_RDCTL_BUFD | FLCTL_BANK0_RDCTL_BUFI);
+    FLCTL->BANK1_RDCTL =
+	FLCTL->BANK1_RDCTL | (FLCTL_BANK1_RDCTL_BUFD | FLCTL_BANK1_RDCTL_BUFI);
+#endif
 
 }
-
-

@@ -14,9 +14,9 @@
 //  Control taken away pre-emtively by the KERNEL
 void Thread0(void)
 {
-    while(1) {
-        P2->OUT ^= 0x04;            // Toggle LED
-        __delay_cycles(500000);     // Delay
+    while (1) {
+	P2->OUT ^= 0x04;	// Toggle LED
+	__delay_cycles(500000);	// Delay
     }
 }
 
@@ -25,9 +25,8 @@ void Thread0(void)
 // Control taken away pre-emtively by the KERNEL
 void Thread1(void)
 {
-    while(1) {
-        P1->OUT ^= 0x01;            // Toggle LED
-        __delay_cycles(500000);     // Delay
+    while (1) {
+	P1->OUT ^= 0x01;	// Toggle LED
+	__delay_cycles(500000);	// Delay
     }
 }
-

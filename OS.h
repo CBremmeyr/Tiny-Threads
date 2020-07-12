@@ -11,7 +11,7 @@
 #ifndef OS_H_
 #define OS_H_
 
-#define STACKSIZE   100     // Number of 32-bit words in stack
+#define STACKSIZE   100		// Number of 32-bit words in stack
 
 #define TIME_1MS    3000
 #define TIME_2MS    6000
@@ -24,7 +24,7 @@ void OS_Init(void);
 // Add three foreground threads to the scheduler in a Round-Robin fashion
 // Inputs: three pointers to a void/void foreground tasks
 // Outputs: 1 if successful, 0 if this thread can not be added
-int OS_AddThreads(void(*Thread0)(void), void(*Thread1)(void));
+int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void));
 
 // ====== OS_Launch =======
 // Start the scheduler, Enable interrupts
@@ -33,4 +33,3 @@ void OS_Launch(uint32_t theTimeSlice);
 
 // Header guard end
 #endif
-
