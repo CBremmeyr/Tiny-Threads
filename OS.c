@@ -42,7 +42,7 @@ void OS_Init(void)
     OS_DisableInterrupts(); // Disable interrupts until OS_Launch
 
     // Initialize OS controlled I/O: SysTick Timer, 3 MHz crystal input clock
-    SysTick->CTRL = 0; //disable SysTick
+    SysTick->CTRL = 0;    //disable SysTick
     SysTick->CTRL = 0x06; //interrupts, main CLK
 
     // Set priority to 7 so that it allows threads to run
