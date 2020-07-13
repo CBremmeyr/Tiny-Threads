@@ -21,14 +21,14 @@
 void OS_Init(void);
 
 // ====== OS_AddThread ======
-// Add three foreground threads to the scheduler in a Round-Robin fashion
-// Inputs: three pointers to a void/void foreground tasks
+// Add foreground threads to the scheduler in a Round-Robin fashion
+// Inputs: pointers to a void/void foreground tasks
 // Outputs: 1 if successful, 0 if this thread can not be added
 int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void));
 
 // ====== OS_Launch =======
 // Start the scheduler, Enable interrupts
-// Inputs: Time (ms) to give each thread to run before preemtivly changing threads
+// Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
 void OS_Launch(uint32_t theTimeSlice);
 
 // Header guard end

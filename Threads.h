@@ -13,12 +13,12 @@
 
 // ===== Thread 0 =====
 //  Responsible for toggling on-board blue RGB LED infinitely
-//  Control taken away pre-emtively by the KERNEL
+//  Control taken away preemptively by the KERNEL
 void Thread0(void);
 
 // ===== Thread 1 =====
 // Responsible for toggling on-board red ONLY LED infinitely
-// Control taken away pre-emtively by the KERNEL
+// Control taken away preemptively by the KERNEL
 void Thread1(void);
 
 // Header guard end

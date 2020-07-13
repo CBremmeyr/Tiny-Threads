@@ -10,8 +10,8 @@
 #include "msp.h"
 
 // ===== Thread 0 =====
-//  Responsible for toggling on-board blue RGB LED infinitely
-//  Control taken away pre-emtively by the KERNEL
+//  Responsible for toggling on-board BLUE RGB LED infinitely
+//  Control taken away preemptively by the KERNEL
 void Thread0(void)
 {
     while (1) {
@@ -21,8 +21,8 @@ void Thread0(void)
 }
 
 // ===== Thread 1 =====
-// Responsible for toggling on-board red ONLY LED infinitely
-// Control taken away pre-emtively by the KERNEL
+// Responsible for toggling on-board RED LED infinitely
+// Control taken away preemptively by the KERNEL
 void Thread1(void)
 {
     while (1) {

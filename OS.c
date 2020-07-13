@@ -53,28 +53,29 @@ void OS_Init(void)
 // Inputs: i is the thread number
 void SetInitialStack(int i)
 {
-    tcbs[i].sp = &Stacks[i][STACKSIZE - 16];	// Thread stack pointer
+    tcbs[i].sp = &Stacks[i][STACKSIZE - 16];// Thread stack pointer
 
     Stacks[i][STACKSIZE - 1] = 0x21000000;	// XPSR - SysTick Interrupt   -- Saved by Exception
-    Stacks[i][STACKSIZE - 3] = 0x0;	// R14 (LR)
-    Stacks[i][STACKSIZE - 4] = 0x0;	// R12 (General Register)
-    Stacks[i][STACKSIZE - 5] = 0x0;	// R3  (General Register)
-    Stacks[i][STACKSIZE - 6] = 0x0;	// R2  (General Register)
-    Stacks[i][STACKSIZE - 7] = 0x0;	// R1  (General Register)
-    Stacks[i][STACKSIZE - 8] = 0x0;	// R0  (General Register)     -- Saved by Exception
-    Stacks[i][STACKSIZE - 9] = 0x0;	// R11 (General Register)     -- Manually saved
-    Stacks[i][STACKSIZE - 10] = 0x0;	// R10 (General Register)
-    Stacks[i][STACKSIZE - 11] = 0x0;	// R9  (General Register)
-    Stacks[i][STACKSIZE - 12] = 0x0;	// R8  (General Register)
-    Stacks[i][STACKSIZE - 13] = 0x0;	// R7  (General Register)
-    Stacks[i][STACKSIZE - 14] = 0x0;	// R6  (General Register)
-    Stacks[i][STACKSIZE - 15] = 0x0;	// R5  (General Register)
-    Stacks[i][STACKSIZE - 16] = 0x0;	// R4  (General Register)     -- Manually saved
+    //Stacks[i][STACKSIZE - 2] = Skipped    // ReturnAddress (Fill in OS_AddThreads())
+    Stacks[i][STACKSIZE - 3] = 0x0;	        // R14 (LR)
+    Stacks[i][STACKSIZE - 4] = 0x0;	        // R12 (General Register)
+    Stacks[i][STACKSIZE - 5] = 0x0;	        // R3  (General Register)
+    Stacks[i][STACKSIZE - 6] = 0x0;	        // R2  (General Register)
+    Stacks[i][STACKSIZE - 7] = 0x0;	        // R1  (General Register)
+    Stacks[i][STACKSIZE - 8] = 0x0;	        // R0  (General Register)     -- Saved by Exception
+    Stacks[i][STACKSIZE - 9] = 0x0;	        // R11 (General Register)     -- Manually saved
+    Stacks[i][STACKSIZE - 10] = 0x0;	    // R10 (General Register)
+    Stacks[i][STACKSIZE - 11] = 0x0;	    // R9  (General Register)
+    Stacks[i][STACKSIZE - 12] = 0x0;	    // R8  (General Register)
+    Stacks[i][STACKSIZE - 13] = 0x0;	    // R7  (General Register)
+    Stacks[i][STACKSIZE - 14] = 0x0;	    // R6  (General Register)
+    Stacks[i][STACKSIZE - 15] = 0x0;	    // R5  (General Register)
+    Stacks[i][STACKSIZE - 16] = 0x0;	    // R4  (General Register)     -- Manually saved
 }
 
 // ====== OS_AddThread ======
-// Add three foreground threads to the scheduler in a Round-Robin fashion
-// Inputs: three pointers to a void/void foreground tasks
+// Add foreground threads to the scheduler in a Round-Robin fashion
+// Inputs: pointers to a void/void foreground tasks
 // Outputs: 1 if successful, 0 if this thread can not be added
 int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void))
 {
@@ -95,7 +96,7 @@ int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void))
 
 // ===== OS_Launch ======
 // Start the scheduler, Enable interrupts
-// Inputs: Time (ms) to give each thread to run before pre-emtivly changing threads
+// Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
 void OS_Launch(uint32_t theTimeSlice)	//TODO change to take input as a float mS
 {
     SysTick->LOAD = theTimeSlice;	// Reload Value

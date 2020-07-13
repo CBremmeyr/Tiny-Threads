@@ -18,14 +18,14 @@
         .global  StartOS
         .global  SysTick_Handler
 
-OS_DisableInterrupts: .asmfunc; Complete this
+OS_DisableInterrupts: .asmfunc
 
     CPSID i  ; PRIMASK
     BX LR
 
     .endasmfunc
 
-OS_EnableInterrupts: .asmfunc ; Complete this
+OS_EnableInterrupts: .asmfunc
 
         CPSIE i    ; PRIMASK
         BX LR
@@ -34,7 +34,7 @@ OS_EnableInterrupts: .asmfunc ; Complete this
 
 RunPtAddr .field RunPt,32
 
-SysTick_Handler:  .asmfunc     ; 1) Handler automatically saves R0-R3,R12,LR,PC,PSR on stack upon entry
+SysTick_Handler:  .asmfunc ; 1) Handler automatically saves R0-R3,R12,LR,PC,PSR on stack upon entry
     CPSID I                ; 2) Disable interrupt mechanism to prevent interrupts from happening during switch
     PUSH  {R4-R11}         ; 3) Save remaining regs r4-11 on stack (of current thread)
     LDR   R0, RunPtAddr    ; 4) Load R0 with the address of RunPt, current thread
@@ -42,7 +42,6 @@ SysTick_Handler:  .asmfunc     ; 1) Handler automatically saves R0-R3,R12,LR,PC,
     STR   SP, [R1]         ; 6) Save current SP into TCB structure
     LDR   R1, [R1, #4]     ; 7) Load R1 with the value of RunPt->next
     STR   R1, [R0]         ; 8) Store it in RunPt (so it points to next thread)
-
     LDR   SP, [R1]         ; 9) Load new thread SP; SP = RunPt->sp;
     POP   {R4-R11}         ;10) Restore regs r4-11 (next thread)
     CPSIE I                ;11) Enable interrupt mechanism
@@ -50,7 +49,7 @@ SysTick_Handler:  .asmfunc     ; 1) Handler automatically saves R0-R3,R12,LR,PC,
 
     .endasmfunc
 
-StartOS:  .asmfunc             ; 1) Kickstarts the process with 1st thread
+StartOS:  .asmfunc         ; 1) Kickstarts the process with 1st thread
     LDR   R0, RunPtAddr    ; 2) Load R0 with the address of RunPt, current thread
     LDR   R2, [R0]         ; 3) Load R2 with the value of RunPt
     LDR   SP, [R2]         ; 4) Load SP with new thread SP; SP = RunPt->stackPointer;

@@ -18,11 +18,11 @@
 // Initializes peripherals
 void GPIO_Init(void)
 {
-    // RGB LED
-    P2SEL0 &= ~0x04;		// Pin mode: GPIO
-    P2SEL1 &= ~0x04;
-    P2->DIR |= 0x04;		// Direction: Output
-    P2->OUT &= ~0x04;		// State: Off
+    //RGB LED
+    P2SEL0 &= ~0x07;		// Pin mode: GPIO
+    P2SEL1 &= ~0x07;
+    P2->DIR |= 0x07;		// Direction: Output
+    P2->OUT &= ~0x07;		// State: Off
 
     // Red LED
     P1SEL0 &= ~0x01;		//Pin mode: GPIO
@@ -37,12 +37,11 @@ int main(void)
     // Stop watchdog timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
-    OS_Init();			// Initialize OS
-    GPIO_Init();		// Initialize GPIO peripheral
-
+    OS_Init();			                // Initialize OS
+    GPIO_Init();		                // Initialize GPIO peripheral
     OS_AddThreads(Thread0, Thread1);	// Add Threads to OS
-    OS_Launch(TIME_2MS);	// Launch OS
+    OS_Launch(TIME_2MS);	            // Launch OS
 
-    // This never executes
+    // This should never execute
     return 0;
 }
