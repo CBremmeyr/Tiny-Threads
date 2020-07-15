@@ -169,7 +169,7 @@ void (*const interruptVectors[])(void) = {
     0,				/* Reserved                  */
     0,				/* Reserved                  */
     0,				/* Reserved                  */
-    SVC_Handler,		/* SVCall handler            */
+    SysTick_Handler,		/* SVCall handler            */
     DebugMon_Handler,		/* Debug monitor handler     */
     0,				/* Reserved                  */
     PendSV_Handler,		/* The PendSV handler        */

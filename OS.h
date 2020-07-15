@@ -31,5 +31,7 @@ int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void));
 // Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
 void OS_Launch(uint32_t theTimeSlice);
 
+void yield(void);
+
 // Header guard end
 #endif

@@ -21,5 +21,7 @@ void Thread0(void);
 // Control taken away preemptively by the KERNEL
 void Thread1(void);
 
+void Thread2(void);// ===== Thread 1 =====
+
 // Header guard end
 #endif

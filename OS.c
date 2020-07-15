@@ -12,9 +12,10 @@
 
 // Project Libraries
 #include "OS.h"
+#include "Threads.h"
 
 // Maximum number of threads, used for memory allocation of stacks and thread table
-#define NUMTHREADS  2
+#define NUMTHREADS  3
 
 // ===== Function prototypes of functions in OSasm.asm =====
 void OS_DisableInterrupts();
@@ -80,13 +81,19 @@ void SetInitialStack(int i)
 int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void))
 {
     tcbs[0].next = &tcbs[1];
-    tcbs[1].next = &tcbs[0];
+    tcbs[1].next = &tcbs[2];
+    tcbs[2].next = &tcbs[0];
 
-    SetInitialStack(0);
+    int i; //TODO why cant i put this in da loop
+    for( i = 0; i < NUMTHREADS; ++i){
+        SetInitialStack(i);
+    }
+
     Stacks[0][STACKSIZE - 2] = (uint32_t) Thread0;
 
-    SetInitialStack(1);
     Stacks[1][STACKSIZE - 2] = (uint32_t) Thread1;
+
+    Stacks[2][STACKSIZE - 2] = (uint32_t) Thread2;
 
     // Make RunPt point to Thread 0 so it will run first
     RunPt = &tcbs[0];
@@ -102,4 +109,11 @@ void OS_Launch(uint32_t theTimeSlice)	//TODO change to take input as a float mS
     SysTick->LOAD = theTimeSlice;	// Reload Value
     SysTick->CTRL |= 0x01;	// SysTick Enable
     StartOS();			// Start on the first task
+}
+
+// ====== This function (written in assembly) switches to handler mode. (privileged access) =======
+extern void yield(void) __attribute__((naked));
+void yield(void){
+
+    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
 }
