@@ -15,8 +15,8 @@
 void Thread0(void)
 {
     while (1) {
-	P2->OUT ^= 0x04;	// Toggle LED
-	__delay_cycles(500000);	// Delay
+        P2->OUT ^= 0x04;	// Toggle LED
+        __delay_cycles(500000);	// Delay
     }
 }
 
@@ -26,7 +26,7 @@ void Thread0(void)
 void Thread1(void)
 {
     while (1) {
-	P1->OUT ^= 0x01;	// Toggle LED
-	__delay_cycles(500000);	// Delay
+        P1->OUT ^= 0x01;	// Toggle LED
+        __delay_cycles(500000);	// Delay
     }
 }
