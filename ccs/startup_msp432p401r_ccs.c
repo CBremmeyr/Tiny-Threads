@@ -123,7 +123,7 @@ void (* const interruptVectors[])(void) =
     0,                                     /* Reserved                  */
     0,                                     /* Reserved                  */
     0,                                     /* Reserved                  */
-    SysTick_Handler,                           /* SVCall handler            */
+    SysTick_Handler,                       /* SVCall handler this shortcuts to the SysTick_Handler*/
     DebugMon_Handler,                      /* Debug monitor handler     */
     0,                                     /* Reserved                  */
     PendSV_Handler,                        /* The PendSV handler        */

@@ -27,8 +27,8 @@ OS_DisableInterrupts: .asmfunc
 
 OS_EnableInterrupts: .asmfunc
 
-        CPSIE i    ; PRIMASK
-        BX LR
+    CPSIE i    ; PRIMASK
+    BX LR
 
     .endasmfunc
 

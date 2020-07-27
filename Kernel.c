@@ -9,7 +9,11 @@
 
 // Standard Libraries
 #include <stdio.h>
-#include "msp.h"
+#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+#include "ti/devices/msp432p4xx/inc/msp.h"
+
+// ===== Function prototypes of functions written in ThreadLocks.asm =====
+void Lock_Init(unsigned int* lock);
 
 // Project Libraries
 #include "OS.h"
@@ -37,9 +41,10 @@ int main(void)
     // Stop watchdog timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
+    Lock_Init(&RGB_Lock);
     OS_Init();			                // Initialize OS
     GPIO_Init();		                // Initialize GPIO peripheral
-    OS_AddThreads(Thread0, Thread1);	// Add Threads to OS
+    OS_AddThreads();	                // Add Threads to OS
     OS_Launch(TIME_2MS);	            // Launch OS
 
     // This should never execute
