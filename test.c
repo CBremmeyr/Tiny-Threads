@@ -51,6 +51,10 @@ void test_thread1(void) {
     while(1) { }
 }
 
+void test_thread2(void) {
+    while(1);
+}
+
 
 void test_OS_Init(void) {
 
@@ -64,8 +68,10 @@ void test_OS_Init(void) {
 void test_AddThreads() {
 
     // No side effects that can be check outside the scope of the library
-    OS_AddThread(test_thread0);
-    OS_AddThread(test_thread1);
+    assert(OS_AddThread(test_thread0) == 1);
+    assert(OS_AddThread(test_thread1) == 1);
+    assert(OS_AddThread(test_thread2) == 1);
+    assert(OS_AddThread(NULL) == 0);
 }
 
 void test_OS_Launch() {
@@ -93,6 +99,7 @@ void test_Lock_Acquire_Release(void) {
 
     // Should be able to lock again
     assert(Lock_Acquire(&test_lock) == 1);
+    Lock_Release(&test_lock);
 }
 
 // ===== Run all tests =====

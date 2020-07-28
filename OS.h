@@ -16,7 +16,7 @@
 /* THIS IS THE ONLY AREA THE USER NEEDS TO MODIFY */
 
 #define STACKSIZE   300     // Number of 32-bit words allocated for each thread's stack
-#define NUMTHREADS  2       // Maximum number of threads
+#define NUMTHREADS  3       // Maximum number of threads
 
 /* **************************************************** */
 
@@ -64,7 +64,7 @@ void Lock_Init(lock_t *lock);
 // ===== Lock a resource =====
 // Input: Lock to attempt to acquire
 // Output: return 1 if lock was successfully acquired, 0 if failed
-int Lock_Acquire(lock_t *lock);
+unsigned int Lock_Acquire(lock_t *lock);
 
 // ===== Release specified lock =====
 // Input: Lock to release

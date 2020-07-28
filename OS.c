@@ -48,13 +48,13 @@ static void SetInitialStack(int i)
 
     Stacks[i][STACKSIZE - 1] = 0x01000000;	// XPSR - Thumb instruction  -- Saved by Exception
     //Stacks[i][STACKSIZE - 2] = Skipped    // ReturnAddress (Fill in OS_AddThreads())
-    Stacks[i][STACKSIZE - 3] = 0x0;	        // R14 (LR)
-    Stacks[i][STACKSIZE - 4] = 0x0;	        // R12 (General Register)
-    Stacks[i][STACKSIZE - 5] = 0x0;	        // R3  (General Register)
-    Stacks[i][STACKSIZE - 6] = 0x0;	        // R2  (General Register)
-    Stacks[i][STACKSIZE - 7] = 0x0;	        // R1  (General Register)
-    Stacks[i][STACKSIZE - 8] = 0x0;	        // R0  (General Register)     -- Saved by Exception
-    Stacks[i][STACKSIZE - 9] = 0x0;	        // R11 (General Register)     -- Manually saved
+    Stacks[i][STACKSIZE - 3]  = 0x0;        // R14 (LR)
+    Stacks[i][STACKSIZE - 4]  = 0x0;        // R12 (General Register)
+    Stacks[i][STACKSIZE - 5]  = 0x0;        // R3  (General Register)
+    Stacks[i][STACKSIZE - 6]  = 0x0;        // R2  (General Register)
+    Stacks[i][STACKSIZE - 7]  = 0x0;        // R1  (General Register)
+    Stacks[i][STACKSIZE - 8]  = 0x0;        // R0  (General Register)     -- Saved by Exception
+    Stacks[i][STACKSIZE - 9]  = 0x0;        // R11 (General Register)     -- Manually saved
     Stacks[i][STACKSIZE - 10] = 0x0;	    // R10 (General Register)
     Stacks[i][STACKSIZE - 11] = 0x0;	    // R9  (General Register)
     Stacks[i][STACKSIZE - 12] = 0x0;	    // R8  (General Register)
@@ -134,5 +134,11 @@ void EndCritical(int32_t primask){
 extern void yield(void) __attribute__((naked));
 void yield(void){
 
+    // Save registers that would normally be saved by exception
+    asm volatile(" PUSH {R0-R3}");
+    asm volatile(" PUSH {R12}");
+    asm volatile(" PUSH {R14}");
+
+    // Run SysTick handler to perform rest of context switch
     asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
 }
