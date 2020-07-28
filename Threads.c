@@ -7,13 +7,15 @@
  * Source file for the individual thread functions
  */
 
-#include "msp.h"
+#include "ti/devices/msp432p4xx/inc/msp.h"
+#include "Threads.h"
 #include "OS.h"
 
+//TODO can we put the below in a .h file to make it just an include
+//TODO maybe put in a section for locks?
 // ======= Function to acquire the lock to be written in LockAcquire.asm ======
 unsigned int Lock_Acquire(unsigned int *lock);
 void Lock_Release(unsigned int *lock);
-unsigned int RGB_Lock;
 
 // ===== Thread 0 =====
 //  Responsible for toggling on-board BLUE RGB LED infinitely
@@ -21,7 +23,7 @@ unsigned int RGB_Lock;
 void Thread0(void)
 {
     while (1) {
-        P1->OUT ^= BIT0;	// Toggle LED
+        P2->OUT ^= 0x04;	// Toggle LED
         __delay_cycles(500000);	// Delay
     }
 }
@@ -32,28 +34,12 @@ void Thread0(void)
 void Thread1(void)
 {
     while (1) {
-        if(Lock_Acquire(&RGB_Lock)){        // Try to acquire lock and if successful
-
-            P2->OUT ^= BIT2;	// Toggle LED
-            __delay_cycles(500000);	// Delay
-
-            P2->OUT &=~ BIT2;
-            Lock_Release(&RGB_Lock);                  // Release lock
-        }
-        yield();
+        P1->OUT ^= 0x01;	// Toggle LED
+        __delay_cycles(500000);	// Delay
     }
 }
 
-void Thread2(void)
-{
-    while (1) {
-        if(Lock_Acquire(&RGB_Lock)){        // Try to acquire lock and if successful
-            P2->OUT ^= BIT1;    // Toggle LED
-            __delay_cycles(500000); // Delay
-
-            P2->OUT &=~ BIT1;
-            Lock_Release(&RGB_Lock);                  // Release lock
-        }
-    yield();
-    }
+void Thread2(){
+    while(1){};
 }
+

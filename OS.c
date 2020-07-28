@@ -7,15 +7,9 @@
  * Library that enables user to use user-space threads
  */
 
-// Standard Libraries
-#include "msp.h"
 
 // Project Libraries
 #include "OS.h"
-#include "Threads.h"
-
-// Maximum number of threads, used for memory allocation of stacks and thread table
-#define NUMTHREADS  3
 
 // ===== Function prototypes of functions in OSasm.asm =====
 void OS_DisableInterrupts();
@@ -23,7 +17,7 @@ void OS_EnableInterrupts();
 void StartOS();
 
 // ===== Local functions ======
-void SetInitialStack(int i);
+static void SetInitialStack(int i);
 
 // ===== Structure to store state of thread =====
 // Thread Control Block
@@ -42,21 +36,18 @@ void OS_Init(void)
 {
     OS_DisableInterrupts();	// Disable interrupts until OS_Launch
 
-    // Initialize OS controlled I/O: SysTick Timer, 3 MHz crystal input clock
-    SysTick->CTRL = 0;		//disable SysTick
-    SysTick->CTRL = 0x06;	//interrupts, main CLK
-
-    // Set priority to 7 so that it allows threads to run
-    SCB->SHP[1] = (SCB->SHP[1] & 0x00FFFFFF) | 0xE0000000;
+    SysTick->CTRL = 0;                                        //disable SysTick
+    SysTick->CTRL = 0x06;                                     //interrupts, main CLK
+    SCB -> SHP[1] = (SCB -> SHP[1] & 0x00FFFFFF)|0xE0000000;  // Set priority 7 so that it allows threads to run
 }
 
 // ===== Sets default values in STACK ======
 // Inputs: i is the thread number
-void SetInitialStack(int i)
+static void SetInitialStack(int i)
 {
     tcbs[i].sp = &Stacks[i][STACKSIZE - 16];// Thread stack pointer
 
-    Stacks[i][STACKSIZE - 1] = 0x21000000;	// XPSR - SysTick Interrupt   -- Saved by Exception
+    Stacks[i][STACKSIZE - 1] = 0x01000000;	// XPSR - Thumb instruction  -- Saved by Exception
     //Stacks[i][STACKSIZE - 2] = Skipped    // ReturnAddress (Fill in OS_AddThreads())
     Stacks[i][STACKSIZE - 3] = 0x0;	        // R14 (LR)
     Stacks[i][STACKSIZE - 4] = 0x0;	        // R12 (General Register)
@@ -78,27 +69,28 @@ void SetInitialStack(int i)
 // Add foreground threads to the scheduler in a Round-Robin fashion
 // Inputs: pointers to a void/void foreground tasks
 // Outputs: 1 if successful, 0 if this thread can not be added
-int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void))
+int OS_AddThreads()
 {
+    int32_t status;
+
+    status = StartCritical();   // Start critical section while building stacks
+
+    //Set up Link List //TODO can we make this dynamic
     tcbs[0].next = &tcbs[1];
     tcbs[1].next = &tcbs[2];
     tcbs[2].next = &tcbs[0];
 
-    int i; //TODO why cant i put this in da loop
-    for( i = 0; i < NUMTHREADS; ++i){
+    //Set up Stacks
+    for(int i = 0; i < NUMTHREADS; ++i){
         SetInitialStack(i);
+        Stacks[i][STACKSIZE - 2] = (int32_t) threads[i];
     }
 
-    Stacks[0][STACKSIZE - 2] = (uint32_t) Thread0;
+    RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
 
-    Stacks[1][STACKSIZE - 2] = (uint32_t) Thread1;
+    EndCritical(status);
 
-    Stacks[2][STACKSIZE - 2] = (uint32_t) Thread2;
-
-    // Make RunPt point to Thread 0 so it will run first
-    RunPt = &tcbs[0];
-
-    return 1;
+    return 1;               // successful
 }
 
 // ===== OS_Launch ======
@@ -106,9 +98,32 @@ int OS_AddThreads(void (*Thread0)(void), void(*Thread1)(void))
 // Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
 void OS_Launch(uint32_t theTimeSlice)	//TODO change to take input as a float mS
 {
-    SysTick->LOAD = theTimeSlice;	// Reload Value
-    SysTick->CTRL |= 0x01;	// SysTick Enable
-    StartOS();			// Start on the first task
+    SysTick->LOAD = theTimeSlice;   //reload Value
+    SysTick->CTRL |= 0x01;          //SysTick Enable
+    StartOS();                      // start on the first task
+}
+
+// ====== StartCritical ======
+// Make a copy of previous I bit, disable interrupts
+// Outputs: previous I bit
+extern int32_t StartCritical(void) __attribute__((naked));
+int32_t StartCritical(void){
+
+    asm volatile(" MRS    R0, PRIMASK");  // Save old status
+    asm volatile(" CPSID  I          ");  // Disable interrupt mechanism in assembly
+    asm volatile(" BX     LR         ");  // Return to the calling function
+    return 0; //This never executes
+}
+
+
+// ====== EndCritical ======
+// Using the copy of previous I bit, restore I bit to previous value
+// Inputs:  previous I bit
+extern void EndCritical(int32_t primask) __attribute__((naked));
+void EndCritical(int32_t primask){
+
+    asm volatile(" MSR    PRIMASK, R0");  // (En/Dis)able interrupt mechanism in assembly
+    asm volatile(" BX     LR         ");  // Return to the calling function
 }
 
 // ====== This function (written in assembly) switches to handler mode. (privileged access) =======
