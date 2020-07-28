@@ -7,7 +7,6 @@
  * Library that enables user to use user-space threads
  */
 
-
 // Project Libraries
 #include "OS.h"
 
@@ -66,37 +65,42 @@ static void SetInitialStack(int i)
 }
 
 // ====== OS_AddThread ======
-// Add foreground threads to the scheduler in a Round-Robin fashion
-// Inputs: pointers to a void/void foreground tasks
+// Add foreground thread to the scheduler in a Round-Robin fashion
+// Inputs: pointer to a void/void foreground tasks aka thread_t
 // Outputs: 1 if successful, 0 if this thread can not be added
-int OS_AddThreads()
-{
+int OS_AddThread(thread_t thread) {
     int32_t status;
+
+    static int i = 0;
+
+    // Fail to add thread if reached max number of threads
+    if(i >= NUMTHREADS) {
+        return 0;
+    }
 
     status = StartCritical();   // Start critical section while building stacks
 
-    //Set up Link List //TODO can we make this dynamic
-    tcbs[0].next = &tcbs[1];
-    tcbs[1].next = &tcbs[2];
-    tcbs[2].next = &tcbs[0];
+    //Set up circular Link List
+    if(i != 0) {
+        tcbs[i-1].next = &tcbs[i];
+    }
+    tcbs[i].next = &tcbs[0];
 
     //Set up Stacks
-    for(int i = 0; i < NUMTHREADS; ++i){
-        SetInitialStack(i);
-        Stacks[i][STACKSIZE - 2] = (int32_t) threads[i];
-    }
+    SetInitialStack(i);
+    Stacks[i][STACKSIZE - 2] = (int32_t)thread;
 
+    ++i;                    // Keep track of next thread to insert
     RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
-
     EndCritical(status);
 
     return 1;               // successful
 }
 
 // ===== OS_Launch ======
-// Start the scheduler, Enable interrupts
+// Start the scheduler, Enable interrupts, Pass control to first thread
 // Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
-void OS_Launch(uint32_t theTimeSlice)	//TODO change to take input as a float mS
+void OS_Launch(uint32_t theTimeSlice)
 {
     SysTick->LOAD = theTimeSlice;   //reload Value
     SysTick->CTRL |= 0x01;          //SysTick Enable
@@ -118,7 +122,7 @@ int32_t StartCritical(void){
 
 // ====== EndCritical ======
 // Using the copy of previous I bit, restore I bit to previous value
-// Inputs:  previous I bit
+// Inputs:  previous I bit, value returned from StartCritical()
 extern void EndCritical(int32_t primask) __attribute__((naked));
 void EndCritical(int32_t primask){
 
@@ -126,7 +130,7 @@ void EndCritical(int32_t primask){
     asm volatile(" BX     LR         ");  // Return to the calling function
 }
 
-// ====== This function (written in assembly) switches to handler mode. (privileged access) =======
+// ====== This function switches to next thread =======
 extern void yield(void) __attribute__((naked));
 void yield(void){
 
