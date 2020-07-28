@@ -7,6 +7,12 @@
  * System entry point and initialization
  */
 
+// If RUN_TESTS is defined, tests will be compiled instead of application
+//#define RUN_TESTS
+#ifdef RUN_TESTS
+    #include "test.h"
+#endif
+
 // Standard Libraries
 #include <stdio.h>
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
@@ -41,6 +47,11 @@ int main(void)
     // Stop watchdog timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
+#ifdef RUN_TESTS
+    test_run();
+    return 0;
+#endif
+
     Lock_Init(&RGB_Lock);
     OS_Init();			                // Initialize OS
     GPIO_Init();		                // Initialize GPIO peripheral
@@ -49,4 +60,5 @@ int main(void)
 
     // This should never execute
     return 0;
+
 }
