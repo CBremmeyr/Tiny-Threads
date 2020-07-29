@@ -8,6 +8,7 @@
  */
 
 #include "ti/devices/msp432p4xx/inc/msp.h"
+
 #include "Threads.h"
 #include "OS.h"
 
@@ -19,8 +20,14 @@ lock_t RGB_Lock;
 void Thread0(void)
 {
     while (1) {
-        P2->OUT ^= 0x04;    // Toggle LED
-        __delay_cycles(500000); // Delay
+        if(Lock_Acquire(&RGB_Lock)) {
+            P2->OUT ^= 0x04;    // Toggle LED
+            Lock_Release(&RGB_Lock);
+            __delay_cycles(500000); // Delay
+        }
+        else {
+            yield();
+        }
     }
 }
 
@@ -35,6 +42,15 @@ void Thread1(void)
     }
 }
 
-void Thread2(){
-    while(1){};
+void Thread2(void){
+    while(1){
+        if(Lock_Acquire(&RGB_Lock)) {
+            P2->OUT ^= 0x02;    // Toggle LED
+            Lock_Release(&RGB_Lock);
+            __delay_cycles(500000); // Delay
+        }
+        else {
+            yield();
+        }
+    }
 }

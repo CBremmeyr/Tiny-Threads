@@ -54,7 +54,8 @@ int32_t StartCritical(void);
 void EndCritical(int32_t primask);
 
 // ====== This function switches to next thread =======
-void yield(void);
+//void yield(void);
+#define yield() asm volatile(" SVC #00")
 
 // ===== Function prototypes of functions written in ThreadLocks.asm =====
 

@@ -10,6 +10,15 @@
 // Project Libraries
 #include "OS.h"
 
+//extern void yield(void) __attribute__((naked));
+//void yield(void){
+//
+//    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
+//
+//    return;
+//}
+//#define yield() asm volatile(" SVC #00");
+
 // ===== Function prototypes of functions in OSasm.asm =====
 void OS_DisableInterrupts();
 void OS_EnableInterrupts();
@@ -90,9 +99,9 @@ int OS_AddThread(thread_t thread) {
     SetInitialStack(i);
     Stacks[i][STACKSIZE - 2] = (int32_t)thread;
 
-    ++i;                    // Keep track of next thread to insert
     RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
     EndCritical(status);
+    ++i;                    // Keep track of next thread to insert
 
     return 1;               // successful
 }
@@ -131,14 +140,10 @@ void EndCritical(int32_t primask){
 }
 
 // ====== This function switches to next thread =======
-extern void yield(void) __attribute__((naked));
-void yield(void){
-
-    // Save registers that would normally be saved by exception
-    asm volatile(" PUSH {R0-R3}");
-    asm volatile(" PUSH {R12}");
-    asm volatile(" PUSH {R14}");
-
-    // Run SysTick handler to perform rest of context switch
-    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
-}
+//extern void yield(void) __attribute__((naked));
+//void yield(void){
+//
+//    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
+//
+//    return;
+//}

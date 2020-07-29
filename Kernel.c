@@ -63,7 +63,11 @@ int main(void)
     GPIO_Init();                        // Initialize GPIO peripheral
 
     // Add Threads to OS, if any additions fail, abort
-    assert(OS_AddThread(Thread0) == 0 || OS_AddThread(Thread1) == 0 || OS_AddThread(Thread2) == 0);
+    int results = 0;
+    results += OS_AddThread(Thread0);
+    results += OS_AddThread(Thread1);
+    results += OS_AddThread(Thread2);
+    assert(results == 3);
 
     OS_Launch(TIME_2MS);                // Launch OS
 
