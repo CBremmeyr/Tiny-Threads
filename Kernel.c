@@ -9,7 +9,7 @@
 
 // If RUN_TESTS is defined then test will be compiled, else the LED app will be compiled
 // Comment out to run LED app
-#define RUN_TESTS
+//#define RUN_TESTS
 
 #ifdef RUN_TESTS
 #include "test.h"
