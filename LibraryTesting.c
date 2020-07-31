@@ -8,9 +8,9 @@
  */
 #include <assert.h>
 #include <stdlib.h>
-#include "LibraryTesting.h"
 
 #include "OS.h"
+#include "LibraryTesting.h"
 
 void test_thread0(void);
 void test_thread1(void);
@@ -18,7 +18,6 @@ void test_thread1(void);
 static int thread_run_flag = 0;
 static lock_t test_lock = 1;
 
-//Blink Red LED
 void test_thread0(void) {
 
     // This thread should run first
@@ -41,7 +40,6 @@ void test_thread0(void) {
     }
 }
 
-//Blink RGB - Blue
 void test_thread1(void) {
 
     // Thread0 should run before this thread

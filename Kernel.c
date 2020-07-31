@@ -12,7 +12,7 @@
 //#define RUN_TESTS
 
 #ifdef RUN_TESTS
-#include "test.h"
+#include <LibraryTesting.h>
 #endif
 
 // Standard Libraries
