@@ -60,3 +60,5 @@ dkms.conf
 *.h~
 static_err.txt
 
+Debug/*
+

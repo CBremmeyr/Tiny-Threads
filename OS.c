@@ -7,9 +7,17 @@
  * Library that enables user to use user-space threads
  */
 
-
 // Project Libraries
 #include "OS.h"
+
+//extern void yield(void) __attribute__((naked));
+//void yield(void){
+//
+//    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
+//
+//    return;
+//}
+//#define yield() asm volatile(" SVC #00");
 
 // ===== Function prototypes of functions in OSasm.asm =====
 void OS_DisableInterrupts();
@@ -49,13 +57,13 @@ static void SetInitialStack(int i)
 
     Stacks[i][STACKSIZE - 1] = 0x01000000;	// XPSR - Thumb instruction  -- Saved by Exception
     //Stacks[i][STACKSIZE - 2] = Skipped    // ReturnAddress (Fill in OS_AddThreads())
-    Stacks[i][STACKSIZE - 3] = 0x0;	        // R14 (LR)
-    Stacks[i][STACKSIZE - 4] = 0x0;	        // R12 (General Register)
-    Stacks[i][STACKSIZE - 5] = 0x0;	        // R3  (General Register)
-    Stacks[i][STACKSIZE - 6] = 0x0;	        // R2  (General Register)
-    Stacks[i][STACKSIZE - 7] = 0x0;	        // R1  (General Register)
-    Stacks[i][STACKSIZE - 8] = 0x0;	        // R0  (General Register)     -- Saved by Exception
-    Stacks[i][STACKSIZE - 9] = 0x0;	        // R11 (General Register)     -- Manually saved
+    Stacks[i][STACKSIZE - 3]  = 0x0;        // R14 (LR)
+    Stacks[i][STACKSIZE - 4]  = 0x0;        // R12 (General Register)
+    Stacks[i][STACKSIZE - 5]  = 0x0;        // R3  (General Register)
+    Stacks[i][STACKSIZE - 6]  = 0x0;        // R2  (General Register)
+    Stacks[i][STACKSIZE - 7]  = 0x0;        // R1  (General Register)
+    Stacks[i][STACKSIZE - 8]  = 0x0;        // R0  (General Register)     -- Saved by Exception
+    Stacks[i][STACKSIZE - 9]  = 0x0;        // R11 (General Register)     -- Manually saved
     Stacks[i][STACKSIZE - 10] = 0x0;	    // R10 (General Register)
     Stacks[i][STACKSIZE - 11] = 0x0;	    // R9  (General Register)
     Stacks[i][STACKSIZE - 12] = 0x0;	    // R8  (General Register)
@@ -66,37 +74,60 @@ static void SetInitialStack(int i)
 }
 
 // ====== OS_AddThread ======
-// Add foreground threads to the scheduler in a Round-Robin fashion
-// Inputs: pointers to a void/void foreground tasks
+// Add foreground thread to the scheduler in a Round-Robin fashion
+// Inputs: pointer to a void/void foreground tasks aka thread_t
 // Outputs: 1 if successful, 0 if this thread can not be added
-int OS_AddThreads()
-{
+int OS_AddThread(thread_t thread) {
     int32_t status;
+
+    static int i = 0;
+
+    // Fail to add thread if reached max number of threads
+    if(i >= NUMTHREADS) {
+        return 0;
+    }
 
     status = StartCritical();   // Start critical section while building stacks
 
-    //Set up Link List //TODO can we make this dynamic
-    tcbs[0].next = &tcbs[1];
-    tcbs[1].next = &tcbs[2];
-    tcbs[2].next = &tcbs[0];
+    //Set up circular Link List
+    if(i != 0) {
+        tcbs[i-1].next = &tcbs[i];
+    }
+    tcbs[i].next = &tcbs[0];
 
     //Set up Stacks
-    for(int i = 0; i < NUMTHREADS; ++i){
-        SetInitialStack(i);
-        Stacks[i][STACKSIZE - 2] = (int32_t) threads[i];
-    }
+    SetInitialStack(i);
+    Stacks[i][STACKSIZE - 2] = (int32_t)thread;
 
     RunPt = &tcbs[0];       // Make RunPt point to Thread 0 so it will run first
-
     EndCritical(status);
+    ++i;                    // Keep track of next thread to insert
 
     return 1;               // successful
 }
 
+// ===== OS_CloseThread =====
+// Remove current thread from scheduler (never run this thread again) and pass
+// control to next thread.
+void OS_CloseThread(void) {
+
+    // Move to node before current node
+    tcbType *cursor = RunPt->next;
+    while(cursor->next != RunPt) {
+        cursor = cursor->next;
+    }
+
+    // Remove current node from scheduler
+    cursor->next = RunPt->next;
+
+    // Pass control to next thread
+    yield();
+}
+
 // ===== OS_Launch ======
-// Start the scheduler, Enable interrupts
+// Start the scheduler, Enable interrupts, Pass control to first thread
 // Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
-void OS_Launch(uint32_t theTimeSlice)	//TODO change to take input as a float mS
+void OS_Launch(uint32_t theTimeSlice)
 {
     SysTick->LOAD = theTimeSlice;   //reload Value
     SysTick->CTRL |= 0x01;          //SysTick Enable
@@ -118,7 +149,7 @@ int32_t StartCritical(void){
 
 // ====== EndCritical ======
 // Using the copy of previous I bit, restore I bit to previous value
-// Inputs:  previous I bit
+// Inputs:  previous I bit, value returned from StartCritical()
 extern void EndCritical(int32_t primask) __attribute__((naked));
 void EndCritical(int32_t primask){
 
@@ -126,9 +157,11 @@ void EndCritical(int32_t primask){
     asm volatile(" BX     LR         ");  // Return to the calling function
 }
 
-// ====== This function (written in assembly) switches to handler mode. (privileged access) =======
-extern void yield(void) __attribute__((naked));
-void yield(void){
-
-    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
-}
+// ====== This function switches to next thread =======
+//extern void yield(void) __attribute__((naked));
+//void yield(void){
+//
+//    asm volatile(" SVC #00");  //Jumps to SysTick_Handler (changed interrupt Vector)
+//
+//    return;
+//}
