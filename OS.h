@@ -13,18 +13,18 @@
 
 #include "ti/devices/msp432p4xx/inc/msp.h"
 
-/* THIS IS THE ONLY AREA THE USER NEEDS TO MODIFY */
+/* To use the library change the search for the label
+   "CHANGE PER APPLICATION:" Modify the code to fit the
+   application
+*/
 
-#define STACKSIZE   300     // Number of 32-bit words allocated for each thread's stack
-#define NUMTHREADS  3       // Maximum number of threads
-
-/* **************************************************** */
+#define STACKSIZE   300     // CHANGE PER APPLICATION: Number of 32-bit words allocated for each thread's stack
+#define NUMTHREADS  3       // CHANGE PER APPLICATION: Maximum number of threads
 
 typedef void (*thread_t)(void);
 typedef unsigned int lock_t;
 
-/* END OF AREA THAT NEEDS TO BE MODIFIED        */
-
+//Times are based on a 3MHz SysTick Timer
 #define TIME_1MS    3000
 #define TIME_2MS    6000
 

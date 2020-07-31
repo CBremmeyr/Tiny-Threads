@@ -64,6 +64,7 @@ int main(void)
 
     // Add Threads to OS, if any additions fail, abort
     int results = 0;
+    //CHANGE PER APPLICATION: Add all threads here
     results += OS_AddThread(Thread0);
     results += OS_AddThread(Thread1);
     results += OS_AddThread(Thread2);
