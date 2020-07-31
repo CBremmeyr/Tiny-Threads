@@ -106,6 +106,24 @@ int OS_AddThread(thread_t thread) {
     return 1;               // successful
 }
 
+// ===== OS_CloseThread =====
+// Remove current thread from scheduler (never run this thread again) and pass
+// control to next thread.
+void OS_CloseThread(void) {
+
+    // Move to node before current node
+    tcbType *cursor = RunPt->next;
+    while(cursor->next != RunPt) {
+        cursor = cursor->next;
+    }
+
+    // Remove current node from scheduler
+    cursor->next = RunPt->next;
+
+    // Pass control to next thread
+    yield();
+}
+
 // ===== OS_Launch ======
 // Start the scheduler, Enable interrupts, Pass control to first thread
 // Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads

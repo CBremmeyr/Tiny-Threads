@@ -38,6 +38,11 @@ void OS_Init(void);
 // Outputs: 1 if successful, 0 if this thread can not be added
 int OS_AddThread(thread_t thread);
 
+// ===== OS_CloseThread =====
+// Remove current thread from scheduler (never run this thread again) and pass
+// control to next thread.
+void OS_CloseThread(void);
+
 // ====== OS_Launch =======
 // Start the scheduler, Enable interrupts
 // Inputs: Time (Clock Cycles) to give each thread to run before preemptively  changing threads
