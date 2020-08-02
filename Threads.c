@@ -21,13 +21,14 @@ void Thread0(void)
 {
     while (1) {
         if(Lock_Acquire(&RGB_Lock)) {
+
+            yield();
+            __delay_cycles(500000); // Delay
             P2->OUT ^= 0x04;    // Toggle LED
             Lock_Release(&RGB_Lock);
-            __delay_cycles(500000); // Delay
+
         }
-        else {
-            yield();
-        }
+    yield();
     }
 }
 
@@ -44,21 +45,27 @@ void Thread1(void)
 
 void Thread2(void){
     uint32_t count = 0;
-    while(1){
-        if(Lock_Acquire(&RGB_Lock)) {
-            P2->OUT ^= 0x02;    // Toggle LED
-            count++;
-            Lock_Release(&RGB_Lock);
-            __delay_cycles(500000); // Delay
-        }
-        else {
-            yield();
-        }
 
-        // Close thread after some number of LED toggles
-        if(count >= 10) {
-            P2->OUT &=~ 0x02;   // Turn off LED
-            OS_CloseThread();
+    while (1) {
+        if(Lock_Acquire(&RGB_Lock)) {
+            count++;
+            yield();
+            __delay_cycles(500000); // Delay
+            P2->OUT ^= 0x02;    // Toggle LED
+
+            // Close thread after some number of LED toggles
+            if(count >= 10) {
+                OS_CloseThread();
+            }
+
+            Lock_Release(&RGB_Lock);
+
         }
+    yield();
+
     }
+
+
+
+
 }
